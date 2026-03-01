@@ -23,7 +23,19 @@ Score builds applications. Stage hosts them.
 - Stage may use Score for its own web surfaces, such as docs or dashboards.
 - Stage should not require privileged knowledge of Score internals to do its job.
 
-## 4. Expected Capabilities
+## 4. Remote Build Compatibility
+
+Stage is the remote build executor for production deploys. It must execute canonical Score builds without introducing a Stage-specific runtime.
+
+Requirements:
+
+- run remote builds using canonical `score build` semantics
+- pin Score and Swift toolchain versions per build
+- use reproducible build environments
+- return deployment IDs and service URLs after successful activation
+- keep artifacts portable so projects remain deployable outside Stage
+
+## 5. Expected Capabilities
 
 When Stage work begins in earnest, it should cover:
 
@@ -34,7 +46,7 @@ When Stage work begins in earnest, it should cover:
 
 The exact CLI and dashboard surface should be documented once implementation begins, not before.
 
-## 5. Non-Goals
+## 6. Non-Goals
 
 - becoming a general JavaScript hosting platform
 - forcing users into Score to use Stage

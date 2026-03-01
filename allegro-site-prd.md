@@ -62,4 +62,4 @@ The site includes:
 - Allegro Site becomes the canonical public docs surface for the ecosystem
 
 Previous: [Allegro Libretto PRD](libretto-prd.md)
-Next: [Progress](progress.md)
+Next: [Allegro Composer PRD](composer-prd.md)

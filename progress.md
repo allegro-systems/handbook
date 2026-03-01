@@ -1,8 +1,8 @@
 # Allegro Build Progress
 
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md)
+[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md)
 
-Score -> Stage -> Libretto -> Allegro Site
+Score -> Stage -> Libretto -> Allegro Site -> Composer
 
 ## Summary
 
@@ -12,6 +12,7 @@ Score -> Stage -> Libretto -> Allegro Site
 | Stage | Planning | 5% | Product boundary is defined, implementation has not started |
 | Libretto | Planning | 2% | Reference application remains downstream of Stage |
 | Allegro Site | Planning | 1% | Public docs and product surface is defined at a high level, implementation has not started |
+| Composer | Planning | 7% | Product boundary and architecture are now defined; implementation has not started |
 
 ## Score
 
@@ -94,6 +95,27 @@ Progress: **1%**
 - [ ] First production deploy
 - [ ] v1.0.0 release
 - [ ] Secure repo controls
+
+## Composer
+
+Status: **Planning**
+
+Progress: **7%**
+
+- Native visual editor for Score (macOS + iPad)
+- Unblocked by: Allegro Site v1.0.0
+
+- [x] PRD complete
+- [ ] Native app shell (macOS)
+- [ ] Native app shell (iPad)
+- [ ] Single-worker project hydration/eviction model
+- [ ] Local `score dev` integration (watch/preview/errors)
+- [ ] Local `score build` integration
+- [ ] Publish flow to Stage (`score deploy` parity)
+- [ ] Capability manifest UX surfacing
+- [ ] v1.0.0 release
+- [ ] Secure repo controls
+
 
 Next: [Systems Manifesto](manifesto.md)
 
