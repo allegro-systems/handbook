@@ -8,7 +8,7 @@ Score -> Stage -> Libretto -> Allegro Site -> Composer
 
 | Phase | Status | Progress | Notes |
 | --- | --- | --- | --- |
-| Score | In Progress | 38% | Core + HTML/CSS renderers + Router are implemented and covered; downstream runtime/integration modules remain pending |
+| Score | In Progress | 85% | Core + HTML/CSS/Router/Runtime + Storage + Auth + Content + Assets + UI + Vendor all implemented and covered; CLI tooling and examples pending |
 | Stage | Planning | 5% | Product boundary is defined, implementation has not started |
 | Libretto | Planning | 2% | Reference application remains downstream of Stage |
 | Allegro Site | Planning | 1% | Public docs and product surface is defined at a high level, implementation has not started |
@@ -18,7 +18,7 @@ Score -> Stage -> Libretto -> Allegro Site -> Composer
 
 Status: **In Progress**
 
-Progress: **38%**
+Progress: **85%**
 
 - Swift web framework
 
@@ -27,14 +27,13 @@ Progress: **38%**
 - [x] ScoreHTML - HTML renderer with broad node coverage and conformance documentation
 - [x] ScoreCSS - modifier emission, stylesheet rule deduplication, and conformance documentation
 - [x] ScoreRouter - route table compilation, path matching with parameter extraction, 404/405 error handling
-- [ ] ScoreRuntime - server runtime, build-mode detection, and browser/runtime assets
-- [ ] ScoreDB - persistence contract and storage implementation
-- [ ] ScoreKV - in-process key-value store
-- [ ] ScoreAuth - authentication primitives
-- [ ] ScoreContent - content ingestion and rendering helpers
-- [ ] ScoreAssets - asset pipeline
-- [ ] ScoreUI - first-party component library
-- [ ] ScoreVendor - vendor integration boundary
+- [x] ScoreRuntime - HTTP server, page renderer, CSS/JS pipeline, reactive model (@State/@Computed/@Action), event bindings, JS emitter, dev/prod environments
+- [x] ScoreStorage - unified transactional KV store with FoundationDB-compatible protocol, InMemoryStore for local dev, TTL, transactions, scan, increment
+- [x] ScoreAuth - Magic Link email auth, Passkey challenge/credential types, session lifecycle, CSRF tokens, email configuration
+- [x] ScoreContent - Markdown-to-Node conversion, 12 built-in syntax themes, code blocks with filename/copy/line numbers, MathML rendering, front matter parsing, content collections
+- [x] ScoreAssets - SHA256 fingerprinting, asset manifest, 24 MIME types, gzip optimization, asset pipeline orchestration
+- [x] ScoreUI - 30 shadcn-equivalent components (Accordion, Alert, Avatar, Badge, Breadcrumb, Button variants, Card, Checkbox, CommandPalette, Dialog, Dropdown, Input, Label, LocalePicker, NavBar, Pagination, Progress, RadioGroup, Select, Separator, Sheet, Skeleton, Slider, Switch, Table, Tabs, Textarea, Toast, Toggle, Tooltip)
+- [x] ScoreVendor - Script node for third-party injection, Analytics providers (Google Analytics, Plausible, custom), VendorIntegration protocol
 - [ ] CLI tooling
 - [ ] Canonical example applications
 - [ ] v1.0.0 release

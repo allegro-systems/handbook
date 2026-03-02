@@ -38,6 +38,21 @@ The remaining targets establish package boundaries and future expansion points, 
 
 Score persistence direction is now locked: Score uses one transactional KV storage methodology. Any legacy storage module boundaries in the package layout are migration artifacts and not separate long-term product methodologies.
 
+### End Goal Default Directory Structure
+
+```plaintext
+Application/
+  Sources/Application/
+    Components/
+    Controllers/
+    Pages/
+    Assets/
+    main.swift
+```
+
+> [!NOTE]
+> all examples should follow this structure and the cli tool minimal should generate this structure with 1 example per directory.
+
 ### Application model
 
 The current application contract is protocol-based and intentionally small:
@@ -106,26 +121,126 @@ The next meaningful Score milestones are:
 - keep documentation tied to checked-in APIs instead of speculative syntax
 - expand test coverage alongside each newly-real module
 
-## 5. Build Artifact Contract
+### 4.1 Planned Authoring Surface
 
-All production-oriented Score builds must emit a portable, environment-agnostic artifact directory with this canonical structure:
+Score's intended end-state authoring flow remains:
+
+- `Application`
+- `Theme`
+- `Metadata`
+- `Page`
+- `Controller`
+- `Component`
+- styling and responsive modifiers
+- interactivity and data capabilities
+
+The generated project scaffold for `score init` should make that shape explicit from day one:
 
 ```text
-/dist
+Sources/
+  App.swift
+  Controllers/
+  Pages/
+  Middleware/
+  Components/
+  Models/
+  Utilities/
+Package.swift
+Resources/
+  Localizable.xcstrings
+  Assets/
+```
+
+`score init` should ship first-party templates for at least:
+
+- `blog`
+- `marketing`
+- `docs`
+- `saas`
+- `social`
+- `static`
+- `calculator`
+- `minimal`
+- `localised`
+
+Those templates are product examples, not empty stubs, and must reflect the canonical Score patterns for each use case.
+
+### 4.2 Theme Contract
+
+The final Score theme model must preserve these rules:
+
+- a theme declaration is optional; Score ships a complete default theme
+- `Application.theme` is the canonical declaration site
+- `ThemePatch` is the additive override mechanism for dark and named variants
+- semantic roles, typography, spacing, radius, and syntax highlighting are all part of the same theme contract
+- custom color roles must compile to typed Swift accessors rather than stringly lookups
+
+The theme surface must include, at minimum:
+
+- built-in semantic roles such as `surface`, `text`, `border`, and `accent`
+- custom role shade scales defined from palette colors or explicit `oklch(...)` values
+- `dark: ThemePatch(...)` declared inline with the base theme rather than mutated later
+- `named: [String: ThemePatch]` for alternate named themes such as `ocean` or `forest`
+- font families for sans, serif, mono, and optional brand usage
+- type scale, spacing scale, radius scale, and syntax theme configuration
+
+Color-mode and theme-selection behavior must be explicit:
+
+- system appearance is the default baseline when no explicit user preference exists
+- `.light { ... }` and `.dark { ... }` target explicit color-mode variants
+- `.theme("name") { ... }` targets named themes orthogonally to light/dark handling
+- the active named theme must be rendered on `<html>` as `data-theme="..."`
+- named theme preference must persist via the `as_theme` cookie so SSR and static enhancement agree without flash
+- non-JavaScript theme switching must work through a Score-owned endpoint such as `/_score/theme`
+- JavaScript enhancement may swap the active theme immediately, but correctness must not depend on JavaScript
+
+Syntax highlighting is part of the theme system, not an unrelated addon. `Theme` must be able to select a built-in syntax theme or a custom typed `SyntaxTheme` mapping.
+
+## 5. Build Artifact Contract
+
+The canonical local build root is `.build/score/`. Exported deploy artifacts may be copied elsewhere, but they must preserve this structure and meaning:
+
+```text
+.build/score/
   /static
-  /runtime (optional)
+    index.html
+    about/index.html
+    as-global.css
+    as-group-N.css
+    as-interactivity.js (optional)
+    as-data.js (optional)
+    as-scroll.js (optional)
+    as-position.js (optional)
+    as-transitions.js (optional)
+    assets/
+    manifest.webmanifest (optional)
+    sw.js (optional)
+  /server (optional)
   manifest.json
 ```
 
 Required constraints:
 
 - `static` contains the static-first output and must always be present.
-- `runtime` is optional and only emitted when runtime capabilities are required by the project.
+- `server` is optional and only emitted when server runtime capabilities are required by the project.
 - `manifest.json` is required and must describe build identity, toolchain versions, and activated capabilities.
 - Output must remain deployable outside Stage with no Stage-specific runtime coupling.
+- Static JS modules must only be emitted when their triggering features are present in the compiled program.
 - Runtime artifacts must not embed machine-specific absolute paths.
 
-### 5.1 Manifest Requirements
+### 5.1 Static Bundle Structure
+
+Static output must follow these rules:
+
+- `as-global.css` contains reset and base token output shared across the build
+- `as-group-N.css` contains route-group or feature-group CSS only for the surfaces that need it
+- JS remains zero by default
+- `as-interactivity.js` is emitted only for interactive pages
+- `as-data.js` is emitted only for data/runtime features that require it
+- focused helper modules such as `as-scroll.js`, `as-position.js`, and `as-transitions.js` are emitted only when the corresponding feature families are used
+- PWA files such as `manifest.webmanifest` and `sw.js` are emitted only when PWA capabilities are declared
+
+### 5.2 Manifest Requirements
 
 `manifest.json` must include, at minimum:
 
@@ -135,7 +250,7 @@ Required constraints:
 - deterministic build fingerprint
 - capability manifest
 
-### 5.2 Capability Manifest Schema
+### 5.3 Capability Manifest Schema
 
 Every build must emit a capability manifest in `manifest.json` with the shape:
 
@@ -158,7 +273,16 @@ Semantics:
 
 Score CLI is the canonical execution interface for local development, local production builds, and remote deploy orchestration.
 
-### 6.1 `score dev`
+### 6.1 `score init`
+
+`score init` must:
+
+- generate the canonical project structure
+- support selecting a built-in template interactively or by flag
+- produce a runnable project rather than an empty placeholder
+- keep template structure aligned with current documented Score conventions
+
+### 6.2 `score dev`
 
 `score dev` must:
 
@@ -173,16 +297,16 @@ Toolchain behavior:
 - when a local Swift toolchain is available, `score dev` performs normal compile validation
 - when unavailable, `score dev` may run in structural preview mode with reduced compile validation and explicit warnings
 
-### 6.2 `score build`
+### 6.3 `score build`
 
 `score build` must:
 
 - fully compile the Swift project
-- produce deterministic output in `/dist`
+- produce deterministic output in `.build/score/`
 - emit `manifest.json` including capability data
 - return structured JSON error output when requested by tooling integrations such as Composer
 
-### 6.3 `score deploy`
+### 6.4 `score deploy`
 
 `score deploy` must:
 
@@ -190,7 +314,7 @@ Toolchain behavior:
 - invoke a remote `score build` on Stage using pinned toolchain and Score versions
 - return deployment identity and resolved service URLs
 
-### 6.4 Exit Codes
+### 6.5 Exit Codes
 
 CLI commands must use stable exit codes:
 
@@ -199,7 +323,7 @@ CLI commands must use stable exit codes:
 - `2`: usage or argument error
 - `3`: environment/toolchain prerequisite failure
 
-### 6.5 Structured Error Output
+### 6.6 Structured Error Output
 
 When JSON mode is enabled, command failures must emit machine-readable errors with this minimum schema:
 

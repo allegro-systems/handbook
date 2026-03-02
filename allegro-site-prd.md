@@ -25,6 +25,9 @@ The site includes:
 - Stage documentation to the level supported by implementation maturity
 - Libretto documentation (product story, architecture notes, and learnings)
 
+> [!NOTE]
+> The first page of each documentations section should be a marketing page for that product e.g. show features, benefits and quick examples on that page.
+
 ## 4. Information Architecture Requirements
 
 - separate current implementation from future direction
