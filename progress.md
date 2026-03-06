@@ -1,8 +1,26 @@
 # Allegro Build Progress
 
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md)
+[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md) | [CLI PRD](cli-prd.md) | [Glossary](glossary.md) | [Dependencies](dependencies.md) | [Decisions](decisions.md) | [Changelog](changelog.md)
 
 Score -> Stage -> Libretto -> Allegro Site -> Composer
+
+## Build Sequence
+
+```mermaid
+graph LR
+    Score["Score<br/>Framework<br/>85%"] --> Stage["Stage<br/>Hosting<br/>5%"]
+    Stage --> Libretto["Libretto<br/>Reference App<br/>2%"]
+    Libretto --> Site["Allegro Site<br/>Docs & Marketing<br/>1%"]
+    Site --> Composer["Composer<br/>Visual Editor<br/>7%"]
+
+    style Score fill:#4a9,stroke:#333,color:#fff
+    style Stage fill:#aaa,stroke:#333,color:#fff
+    style Libretto fill:#aaa,stroke:#333,color:#fff
+    style Site fill:#aaa,stroke:#333,color:#fff
+    style Composer fill:#aaa,stroke:#333,color:#fff
+```
+
+Each product is unblocked by the one before it. Downstream products should not invent fake progress by speculating past the maturity of upstream ones.
 
 ## Summary
 
@@ -34,8 +52,9 @@ Progress: **85%**
 - [x] ScoreAssets - SHA256 fingerprinting, asset manifest, 24 MIME types, gzip optimization, asset pipeline orchestration
 - [x] ScoreUI - 30 shadcn-equivalent components (Accordion, Alert, Avatar, Badge, Breadcrumb, Button variants, Card, Checkbox, CommandPalette, Dialog, Dropdown, Input, Label, LocalePicker, NavBar, Pagination, Progress, RadioGroup, Select, Separator, Sheet, Skeleton, Slider, Switch, Table, Tabs, Textarea, Toast, Toggle, Tooltip)
 - [x] ScoreVendor - Script node for third-party injection, Analytics providers (Google Analytics, Plausible, custom), VendorIntegration protocol
-- [ ] CLI tooling
-- [ ] Canonical example applications
+- [ ] CLI tooling (`score init`, `score dev`, `score build`, `score deploy`)
+- [ ] Full-stack web parity (drag-and-drop, file uploads, CORS, compression, JWT, OAuth, Stripe, ScoreData, WebSocket, testing)
+- [ ] Canonical example applications (9 `score init` templates)
 - [ ] v1.0.0 release
 - [ ] Secure repo controls
 
@@ -68,7 +87,7 @@ Progress: **2%**
 - Unblocked by: Stage v1.0.0
 - Wordmark note: `Libretto` with a small cursive `by Allegro` in the bottom-right lockup
 
-- [ ] PRD complete
+- [x] PRD complete
 - [ ] Product requirements
 - [ ] First usable build
 - [ ] Production dogfooding of Score + Stage
@@ -116,6 +135,7 @@ Progress: **7%**
 - [ ] Secure repo controls
 
 
+Previous: [Handbook Index](README.md)
 Next: [Systems Manifesto](manifesto.md)
 
 ## Post-v1 Repository Controls
