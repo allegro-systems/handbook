@@ -1,6 +1,6 @@
 # Allegro Composer PRD
 
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md)
+[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md) | [CLI PRD](cli-prd.md) | [Glossary](glossary.md) | [Dependencies](dependencies.md) | [Decisions](decisions.md) | [Changelog](changelog.md)
 
 _PRD • visual editor_
 
@@ -70,7 +70,7 @@ When no local Swift toolchain exists, Composer may operate in structural preview
 Composer expects `score build` to:
 
 - perform full project compilation
-- produce deterministic `/dist` output
+- produce deterministic output in `.build/score/`
 - emit `manifest.json` with capability data
 - emit machine-readable error payloads for editor integration
 
@@ -121,7 +121,7 @@ Composer must not:
 ### 7.2 Production build
 
 - run `score build`
-- produce portable `/dist` artifact
+- produce portable `.build/score/` artifact
 
 ### 7.3 Stage deployment
 

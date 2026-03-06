@@ -1,6 +1,6 @@
 # Allegro Ecosystem PRD
 
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md)
+[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md) | [CLI PRD](cli-prd.md) | [Glossary](glossary.md) | [Dependencies](dependencies.md) | [Decisions](decisions.md) | [Changelog](changelog.md)
 
 _PRD • ecosystem_
 
@@ -66,7 +66,14 @@ At the current phase, the most important documentation surface is Score. Stage a
 
 ## 7. Dependency Policy
 
-Dependencies across the ecosystem are restricted to the approved Swift Package Index collections recorded in the agent notes. Any exception requires explicit approval and written justification.
+Dependencies across the ecosystem are restricted to approved Swift Package Index collections. The approved sources are:
+
+- [Apple](https://swiftpackageindex.com/apple/collection.json)
+- [Swift.org](https://swiftpackageindex.com/swiftlang/collection.json)
+- [SSWG](https://swiftpackageindex.com/swift-server/collection.json)
+- [Swift Server Community](https://swiftpackageindex.com/swift-server-community/collection.json)
+
+On the JS side, `@js-temporal/polyfill` is the only permitted client-side runtime dependency. Any exception requires explicit approval and written justification.
 
 ## 8. Success Criteria
 

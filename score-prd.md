@@ -1,4 +1,4 @@
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md)
+[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md) | [CLI PRD](cli-prd.md) | [Glossary](glossary.md) | [Dependencies](dependencies.md) | [Decisions](decisions.md) | [Changelog](changelog.md)
 
 _PRD • framework_
 
@@ -27,31 +27,29 @@ The package currently exposes these library products:
 - `ScoreUI`
 - `ScoreVendor`
 
-Today, the substantive implementation is concentrated in:
-
-- `ScoreCore`
-- `ScoreHTML`
-- `ScoreCSS`
-- parts of the routing surface in `ScoreRouter`
-
-The remaining targets establish package boundaries and future expansion points, but most are not yet implemented beyond module placeholders.
+All library modules now have substantive implementations with test coverage. The foundational layers (`ScoreCore`, `ScoreHTML`, `ScoreCSS`, `ScoreRouter`) were implemented first, followed by `ScoreRuntime`, `ScoreStorage`, `ScoreAuth`, `ScoreContent`, `ScoreAssets`, `ScoreUI`, and `ScoreVendor`. Score is at 85% overall, with CLI tooling and canonical examples remaining as the primary gaps before v1.
 
 Score persistence direction is now locked: Score uses one transactional KV storage methodology. Any legacy storage module boundaries in the package layout are migration artifacts and not separate long-term product methodologies.
 
 ### End Goal Default Directory Structure
 
-```plaintext
-Application/
-  Sources/Application/
-    Components/
-    Controllers/
-    Pages/
-    Assets/
-    main.swift
+```text
+Sources/
+  App.swift
+  Controllers/
+  Pages/
+  Middleware/
+  Components/
+  Models/
+  Utilities/
+Package.swift
+Resources/
+  Localizable.xcstrings
+  Assets/
 ```
 
 > [!NOTE]
-> all examples should follow this structure and the cli tool minimal should generate this structure with 1 example per directory.
+> All examples should follow this structure and the CLI tool minimal template should generate this structure with one example per directory.
 
 ### Application model
 
@@ -95,19 +93,19 @@ Current renderer support is focused on:
 
 Tests currently exercise these areas heavily, which makes them the most trustworthy implemented surface in the package.
 
-## 3. Current Gaps
+## 3. Delivered Modules
 
-These package targets exist but should still be treated as planned work rather than delivered product surfaces:
+The following modules have been implemented with test coverage and are now delivered product surfaces:
 
-- `ScoreRuntime`
-- unified transactional storage subsystem (`ScoreStorage`)
-- `ScoreAuth`
-- `ScoreContent`
-- `ScoreAssets`
-- `ScoreUI`
-- `ScoreVendor`
+- `ScoreRuntime` — HTTP server, page renderer, CSS/JS pipeline, reactive model, event bindings, JS emitter
+- `ScoreStorage` — unified transactional KV store with FoundationDB-compatible protocol, InMemoryStore, TTL, transactions, scan, increment
+- `ScoreAuth` — Magic Link email auth, Passkey challenge/credential types, session lifecycle, CSRF tokens
+- `ScoreContent` — Markdown-to-Node conversion, syntax themes, code blocks, MathML rendering, front matter, content collections
+- `ScoreAssets` — SHA256 fingerprinting, asset manifest, MIME types, gzip optimization, asset pipeline
+- `ScoreUI` — 30 shadcn-equivalent components
+- `ScoreVendor` — Script node for third-party injection, Analytics providers, VendorIntegration protocol
 
-The handbook must not describe these as complete systems until their APIs and behaviour exist in code.
+The remaining gaps before v1 are CLI tooling (`score init`, `score dev`, `score build`, `score deploy`) and canonical example applications.
 
 ## 4. Near-Term Product Direction
 
@@ -721,14 +719,78 @@ Watch/observe primitives may be added later as an optional capability for change
 Any such feature must remain layered on top of the same transactional KV contract.
 
 
-## 11. Non-Goals for This Phase
+## 11. Full-Stack Web Parity
+
+Score's intended end state is to be the sole framework dependency for web applications built by the monthly creative build process (`new.sh`). The following capabilities are required to replace the current SolidJS/Axum/Cloudflare stack for full-stack web apps.
+
+### 11.1 Current Coverage
+
+Score already covers these areas of the `new.sh` web stack:
+
+| `new.sh` capability | Score equivalent | Status |
+|---|---|---|
+| SolidJS (UI framework) | ScoreCore + ScoreHTML + ScoreCSS + reactive model | Delivered |
+| Vite (bundler/dev server) | ScoreCLI (`score dev` / `score build`) | Pending |
+| TailwindCSS (utility CSS) | ScoreCSS modifier system | Delivered |
+| Axum (HTTP server) | ScoreRuntime (NIO-based) | Delivered |
+| Cookie sessions | ScoreAuth session lifecycle | Delivered |
+| Magic link auth | ScoreAuth MagicLink | Delivered |
+| Passkey auth | ScoreAuth Passkey | Delivered |
+| CSRF protection | ScoreAuth CSRFToken | Delivered |
+| Rate limiting | ScoreAuth RateLimitMiddleware | Delivered |
+| Markdown content | ScoreContent | Delivered |
+| Asset fingerprinting | ScoreAssets | Delivered |
+| Analytics (Plausible, GA) | ScoreVendor | Delivered |
+| Component library | ScoreUI (30 components) | Delivered |
+
+### 11.2 Missing Capabilities
+
+These `new.sh` stack capabilities have no Score equivalent yet:
+
+| `new.sh` capability | Required Score module | Priority |
+|---|---|---|
+| Drag and drop | ScoreUI `DragSource`/`DropTarget`/`Sortable` | High |
+| File uploads | ScoreRuntime multipart parser | High |
+| CORS | ScoreRuntime `CORSMiddleware` | High |
+| Compression | ScoreRuntime `CompressionMiddleware` | Medium |
+| JWT auth | ScoreAuth `JWTProvider` | High |
+| OAuth2/OIDC | ScoreAuth `OAuthProvider` | High |
+| Stripe payments | ScoreVendor `StripeIntegration` | Medium |
+| SQLite/PostgreSQL | `ScoreData` relational adapter | High |
+| Redis/Valkey | `ScoreCache` protocol | Medium |
+| WebSocket | ScoreRuntime WebSocket handler | High |
+| Structured logging | `ScoreLogger` | Medium |
+| Component testing | `ScoreTesting` | Medium |
+| E2E test harness | `score test` CLI | Low |
+
+### 11.3 Delivery Order
+
+Full-stack parity should follow this order:
+
+1. **CLI tooling** — `score init`, `score dev`, `score build`, `score deploy` (prerequisite for everything)
+2. **Core middleware** — CORS, compression, file uploads (unblocks real app development)
+3. **Data layer** — `ScoreData` relational adapter with SQLite local / PostgreSQL production
+4. **Auth expansion** — JWT, OAuth2/OIDC (unblocks social login and API auth)
+5. **Interactivity** — Drag and drop, WebSocket (unblocks rich UIs)
+6. **Payments** — Stripe integration (unblocks SaaS templates)
+7. **DX** — Testing framework, structured logging (unblocks production confidence)
+
+### 11.4 Success Criteria
+
+Score achieves full-stack web parity when:
+
+- `score init saas` produces a runnable SaaS starter with auth, payments, and CRUD
+- The monthly creative build (`new.sh`) can produce web apps using only Score without fallback to SolidJS/Axum
+- All `score init` templates (blog, marketing, docs, saas, social, static, calculator, minimal, localised) are production-quality Score applications
+
+## 12. Non-Goals for This Phase
 
 - locking in macro syntax before the underlying runtime exists
 - documenting CLIs or generated project layouts that are not implemented
 - specifying large component catalogs before `ScoreUI` exists
 - writing end-state architecture as if every package target were already operational
 
-## 12. Success Criteria
+## 13. Success Criteria
 
 - the current baseline APIs stay small, coherent, and well documented
 - handbook claims remain honest relative to the package contents
@@ -738,7 +800,7 @@ Previous: [Ecosystem PRD](ecosystem-prd.md)
 Next: [Allegro Stage PRD](stage-prd.md)
 
 
-## 13. Post-v1 Repository Policy
+## 14. Post-v1 Repository Policy
 
 At the moment `v1.0.0` is released, the Score repository must move to maintenance controls:
 
