@@ -1342,21 +1342,399 @@ Resources/
   Assets/</code></pre>
 
                 <h2>Application Model</h2>
-                <pre><code><span class="macro">@main</span>
+                <p>
+                    <code>Application</code> is the top-level entry point. Only <code>pages</code> is required — theme defaults to <code>DefaultTheme()</code>, metadata and controllers default to empty, output goes to <code>.build/score/</code>.
+                </p>
+
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-global">Application</span>
+                        <span class="section-title">Entry Point</span>
+                        <span class="section-desc">App.swift → .build/score/</span>
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">App.swift</span>
+                            </div>
+                            <pre><code><span class="macro">@main</span>
 <span class="kw">struct</span> <span class="type">App</span>: <span class="type">Application</span> {
-    <span class="kw">var</span> <span class="prop">pages</span>: [<span class="kw">any</span> <span class="type">Page</span>] { [<span class="type">HomePage</span>()] }
-    <span class="kw">var</span> <span class="prop">controllers</span>: [<span class="kw">any</span> <span class="type">Controller</span>] { [] }
-    <span class="kw">var</span> <span class="prop">theme</span>: (<span class="kw">any</span> <span class="type">Theme</span>)? { <span class="kw">nil</span> }
-    <span class="kw">var</span> <span class="prop">metadata</span>: (<span class="kw">any</span> <span class="type">Metadata</span>)? { <span class="kw">nil</span> }
+    <span class="kw">var</span> <span class="prop">pages</span>: [<span class="kw">any</span> <span class="type">Page</span>] {
+        [<span class="type">HomePage</span>(),
+         <span class="type">AboutPage</span>(),
+         <span class="type">ContactPage</span>()]
+    }
+
+    <span class="kw">var</span> <span class="prop">controllers</span>: [<span class="kw">any</span> <span class="type">Controller</span>] {
+        [<span class="type">APIController</span>()]
+    }
+
+    <span class="kw">var</span> <span class="prop">theme</span>: (<span class="kw">any</span> <span class="type">Theme</span>)? {
+        <span class="type">BrandTheme</span>()
+    }
+
+    <span class="kw">var</span> <span class="prop">metadata</span>: (<span class="kw">any</span> <span class="type">Metadata</span>)? {
+        <span class="type">SiteMetadata</span>(
+            <span class="prop">site</span>: <span class="str">"My App"</span>,
+            <span class="prop">description</span>: <span class="str">"Built with Score"</span>
+        )
+    }
 }</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang">.build/score/</span>
+                            </div>
+                            <pre><code><span class="cmt">// Build artifact structure</span>
+
+.build/score/
+  /static
+    index.html         <span class="cmt">← HomePage</span>
+    about/index.html   <span class="cmt">← AboutPage</span>
+    contact/index.html <span class="cmt">← ContactPage</span>
+    as-global.css      <span class="cmt">← BrandTheme</span>
+    assets/
+  /server              <span class="cmt">← APIController</span>
+  manifest.json
+
+<span class="cmt">// Each page gets:</span>
+<span class="cmt">//   &lt;title&gt; from metadata</span>
+<span class="cmt">//   &lt;meta&gt; from metadata</span>
+<span class="cmt">//   &lt;style&gt; from theme + modifiers</span>
+<span class="cmt">//   &lt;body&gt; from page.body</span>
+<span class="cmt">//   &lt;script&gt; only if @State/@Action</span></code></pre>
+                        </div>
+                    </div>
+                    <p class="dim" style="margin-top: 8px">
+                        Protocol: <code>pages</code>, <code>theme</code>, <code>metadata</code>, <code>controllers</code>, <code>outputDirectory</code>. All but <code>pages</code> have defaults. Theme defaults to <code>DefaultTheme()</code>. JS remains zero by default — only emitted when <code>@State</code> or <code>@Action</code> are used.
+                    </p>
+                </div>
+
+                <h2>Page &amp; Metadata</h2>
+                <p>
+                    A <code>Page</code> declares a route path, optional metadata overrides, and a <code>body</code> built with the node DSL. Page metadata merges with application metadata — page values take precedence.
+                </p>
+
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-page">Page</span>
+                        <span class="section-title">About Page</span>
+                        <span class="section-desc">About.swift → /about/index.html</span>
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">About.swift</span>
+                            </div>
+                            <pre><code><span class="kw">struct</span> <span class="type">AboutPage</span>: <span class="type">Page</span> {
+    <span class="kw">static var</span> <span class="prop">path</span>: <span class="type">String</span> { <span class="str">"/about"</span> }
+
+    <span class="kw">var</span> <span class="prop">metadata</span>: (<span class="kw">any</span> <span class="type">Metadata</span>)? {
+        <span class="type">SiteMetadata</span>(
+            <span class="prop">title</span>: <span class="str">"About"</span>,
+            <span class="prop">description</span>: <span class="str">"Learn more about us"</span>,
+            <span class="prop">keywords</span>: [<span class="str">"about"</span>, <span class="str">"team"</span>]
+        )
+    }
+
+    <span class="kw">var</span> <span class="prop">body</span>: <span class="kw">some</span> <span class="type">Node</span> {
+        <span class="type">Heading</span>(.<span class="prop">h1</span>) { <span class="str">"About Us"</span> }
+        <span class="type">Paragraph</span> { <span class="str">"We build things."</span> }
+            .<span class="fn">color</span>(.<span class="prop">muted</span>)
+    }
+}</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang">about/index.html</span>
+                            </div>
+                            <pre><code><span class="cmt">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> <span class="prop">lang</span>=<span class="str">"en"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;meta</span> <span class="prop">charset</span>=<span class="str">"utf-8"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;meta</span> <span class="prop">name</span>=<span class="str">"viewport"</span>
+    <span class="prop">content</span>=<span class="str">"width=device-width, initial-scale=1"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;title&gt;</span>About — My App<span class="kw">&lt;/title&gt;</span>
+  <span class="kw">&lt;meta</span> <span class="prop">name</span>=<span class="str">"description"</span>
+    <span class="prop">content</span>=<span class="str">"Learn more about us"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;meta</span> <span class="prop">name</span>=<span class="str">"keywords"</span>
+    <span class="prop">content</span>=<span class="str">"about, team"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;style&gt;</span>
+    <span class="cmt">/* theme CSS custom properties */</span>
+    <span class="cmt">/* scoped component CSS */</span>
+    .<span class="prop">as-a1</span> { <span class="prop">color</span>: <span class="fn">oklch</span>(<span class="num">0.5</span> <span class="num">0</span> <span class="num">0</span>) }
+  <span class="kw">&lt;/style&gt;</span>
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+  <span class="kw">&lt;h1&gt;</span>About Us<span class="kw">&lt;/h1&gt;</span>
+  <span class="kw">&lt;p</span> <span class="prop">class</span>=<span class="str">"as-a1"</span><span class="kw">&gt;</span>We build things.<span class="kw">&lt;/p&gt;</span>
+<span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre>
+                        </div>
+                    </div>
+                    <p class="dim" style="margin-top: 8px">
+                        Title composed from page (<code>About</code>) + separator (<code> — </code>) + site (<code>My App</code>). <code>Metadata</code> protocol: <code>site</code>, <code>title</code>, <code>titleSeparator</code>, <code>description</code>, <code>keywords</code>, <code>structuredData</code>. All optional, all default to <code>nil</code>.
+                    </p>
+                </div>
+
+                <h2>Component &amp; Element</h2>
+                <p>
+                    Two composition protocols refine <code>Node</code>. <code>Component</code> is stateless — pure structure and styling. <code>Element</code> is stateful — each instance gets an isolated signal graph with <code>@State</code>, <code>@Computed</code>, <code>@Action</code>.
+                </p>
+
+                <!-- COMPONENT -->
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-component">Component</span>
+                        <span class="section-title">Feature Card</span>
+                        <span class="section-desc">Card.swift → scoped HTML + CSS</span>
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">Card.swift</span>
+                            </div>
+                            <pre><code><span class="cmt">// Component — stateless, reusable</span>
+<span class="cmt">// Pure structure, layout, styling</span>
+
+<span class="kw">struct</span> <span class="type">Card</span>: <span class="type">Component</span> {
+    <span class="kw">let</span> <span class="prop">title</span>: <span class="type">String</span>
+    <span class="kw">let</span> <span class="prop">subtitle</span>: <span class="type">String</span>
+
+    <span class="kw">var</span> <span class="prop">body</span>: <span class="kw">some</span> <span class="type">Node</span> {
+        <span class="type">Div</span> {
+            <span class="type">Heading</span>(.<span class="prop">h3</span>) { title }
+            <span class="type">Paragraph</span> { subtitle }
+                .<span class="fn">color</span>(.<span class="prop">muted</span>)
+        }
+        .<span class="fn">padding</span>(<span class="num">16</span>)
+        .<span class="fn">border</span>(.<span class="prop">solid</span>, <span class="prop">width</span>: <span class="num">1</span>)
+        .<span class="fn">cornerRadius</span>(<span class="num">8</span>)
+    }
+}</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang">HTML + CSS</span>
+                            </div>
+                            <pre><code><span class="cmt">&lt;!-- Scoped HTML --&gt;</span>
+<span class="kw">&lt;div</span> <span class="prop">class</span>=<span class="str">"as-b2"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;h3&gt;</span>Fast Builds<span class="kw">&lt;/h3&gt;</span>
+  <span class="kw">&lt;p</span> <span class="prop">class</span>=<span class="str">"as-a1"</span><span class="kw">&gt;</span>Compile in milliseconds<span class="kw">&lt;/p&gt;</span>
+<span class="kw">&lt;/div&gt;</span>
+
+<span class="cmt">&lt;!-- Scoped CSS (collected, deduped) --&gt;</span>
+<span class="kw">&lt;style&gt;</span>
+.<span class="prop">as-a1</span> {
+  <span class="prop">color</span>: <span class="fn">var</span>(<span class="str">--as-muted</span>);
+}
+.<span class="prop">as-b2</span> {
+  <span class="prop">padding</span>: <span class="num">16</span>px;
+  <span class="prop">border</span>: <span class="num">1</span>px <span class="prop">solid</span>;
+  <span class="prop">border-radius</span>: <span class="num">8</span>px;
+}
+<span class="kw">&lt;/style&gt;</span>
+
+<span class="cmt">// No JS emitted — zero runtime</span></code></pre>
+                        </div>
+                    </div>
+                    <p class="dim" style="margin-top: 8px">
+                        Stateless. No signals, no JS. Modifier chains compile to scoped CSS class names. Identical modifier sets share a single class (<code>as-*</code> prefix). Components compose into Pages and other Components.
+                    </p>
+                </div>
+
+                <!-- ELEMENT -->
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-component">Element</span>
+                        <span class="section-title">Like Button</span>
+                        <span class="section-desc">LikeButton.swift → HTML + CSS + JS</span>
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">LikeButton.swift</span>
+                            </div>
+                            <pre><code><span class="cmt">// Element — stateful, instance-scoped</span>
+<span class="cmt">// Each mount gets isolated signals</span>
+
+<span class="kw">struct</span> <span class="type">LikeButton</span>: <span class="type">Element</span> {
+    <span class="macro">@State</span> <span class="kw">var</span> <span class="prop">liked</span>: <span class="type">Bool</span> = <span class="kw">false</span>
+    <span class="macro">@State</span> <span class="kw">var</span> <span class="prop">count</span>: <span class="type">Int</span> = <span class="num">0</span>
+
+    <span class="macro">@Computed</span>
+    <span class="kw">var</span> <span class="prop">label</span>: <span class="type">String</span> {
+        liked ? <span class="str">"♥ </span>\(count)<span class="str">"</span> : <span class="str">"♡ </span>\(count)<span class="str">"</span>
+    }
+
+    <span class="macro">@Action</span>
+    <span class="kw">func</span> <span class="fn">toggle</span>() {
+        liked.toggle()
+        count += liked ? <span class="num">1</span> : -<span class="num">1</span>
+    }
+
+    <span class="kw">var</span> <span class="prop">body</span>: <span class="kw">some</span> <span class="type">Node</span> {
+        <span class="type">Button</span> { label }
+            .<span class="fn">on</span>(.<span class="prop">click</span>, <span class="prop">action</span>: <span class="str">"toggle"</span>)
+    }
+}</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang">like-button.js</span>
+                            </div>
+                            <pre><code><span class="kw">import</span> { <span class="type">Signal</span> } <span class="kw">from</span> <span class="str">"signal-polyfill"</span>;
+
+<span class="cmt">// Element: factory — per mount</span>
+<span class="kw">export function</span> <span class="macro">mountLikeButton</span>(el) {
+  <span class="cmt">// @State — instance-scoped</span>
+  <span class="kw">const</span> <span class="prop">liked</span> =
+    <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">State</span>(<span class="kw">false</span>);
+  <span class="kw">const</span> <span class="prop">count</span> =
+    <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">State</span>(<span class="num">0</span>);
+
+  <span class="cmt">// @Computed — derived, memoised</span>
+  <span class="kw">const</span> <span class="prop">label</span> =
+    <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">Computed</span>(() =>
+      liked.<span class="macro">get</span>()
+        ? <span class="str">`♥ ${count.get()}`</span>
+        : <span class="str">`♡ ${count.get()}`</span>
+    );
+
+  <span class="cmt">// @Action</span>
+  <span class="kw">const</span> <span class="macro">toggle</span> = () => {
+    liked.<span class="macro">set</span>(!liked.<span class="macro">get</span>());
+    count.<span class="macro">set</span>(count.<span class="macro">get</span>()
+      + (liked.<span class="macro">get</span>() ? <span class="num">1</span> : -<span class="num">1</span>));
+  };
+
+  el.<span class="macro">addEventListener</span>(<span class="str">"click"</span>,
+    toggle);
+
+  <span class="kw">return</span> { liked, count, label,
+           toggle };
+}</code></pre>
+                        </div>
+                    </div>
+                    <div class="scope-lifetime">
+                        <div class="scope-dot" style="background: var(--component-tag)"></div>
+                        <span class="label">Lifetime:</span> Element mount to unmount. Each instance is fully isolated. Use for interactive controls — counters, pickers, toggles, forms.
+                    </div>
+                </div>
 
                 <h2>Theme</h2>
-                <ul>
-                    <li>Optional — Score ships a complete default theme. <code>Application.theme</code> is the declaration site</li>
-                    <li><code>ThemePatch</code> for dark and named variants (<code>.dark { ... }</code>, <code>.theme("ocean") { ... }</code>). Syntax highlighting is part of the theme</li>
-                    <li>Semantic roles (<code>surface</code>, <code>text</code>, <code>border</code>, <code>accent</code>), type/spacing/radius scales, font families. Custom roles compile to typed Swift accessors</li>
-                    <li>Named theme persists via <code>as_theme</code> cookie — SSR and static agree without flash. Non-JS switching via <code>/_score/theme</code></li>
-                </ul>
+                <p>
+                    Optional — Score ships <code>DefaultTheme</code> with sensible defaults. Override by returning a custom <code>Theme</code> conformance from <code>Application.theme</code>. Theme compiles to CSS custom properties.
+                </p>
+
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-global">Application</span>
+                        <span class="section-title">Custom Theme</span>
+                        <span class="section-desc">Theme.swift → as-global.css</span>
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">Theme.swift</span>
+                            </div>
+                            <pre><code><span class="kw">struct</span> <span class="type">BrandTheme</span>: <span class="type">Theme</span> {
+    <span class="kw">var</span> <span class="prop">name</span>: <span class="type">String?</span> { <span class="str">"brand"</span> }
+
+    <span class="kw">var</span> <span class="prop">colorRoles</span>: [<span class="type">String</span>: <span class="type">ColorToken</span>] {
+        [
+            <span class="str">"surface"</span>: .<span class="fn">oklch</span>(<span class="num">0.98</span>, <span class="num">0.01</span>, <span class="num">80</span>),
+            <span class="str">"text"</span>:    .<span class="fn">oklch</span>(<span class="num">0.20</span>, <span class="num">0.02</span>, <span class="num">80</span>),
+            <span class="str">"accent"</span>:  .<span class="fn">blue</span>(<span class="num">600</span>),
+            <span class="str">"border"</span>:  .<span class="prop">border</span>,
+            <span class="str">"muted"</span>:   .<span class="fn">neutral</span>(<span class="num">400</span>),
+        ]
+    }
+
+    <span class="kw">var</span> <span class="prop">fontFamilies</span>: [<span class="type">String</span>: <span class="type">String</span>] {
+        [<span class="str">"sans"</span>: <span class="str">"Inter, system-ui"</span>,
+         <span class="str">"mono"</span>: <span class="str">"JetBrains Mono, monospace"</span>]
+    }
+
+    <span class="kw">var</span> <span class="prop">typeScaleBase</span>: <span class="type">Double</span>  { <span class="num">16</span> }
+    <span class="kw">var</span> <span class="prop">typeScaleRatio</span>: <span class="type">Double</span> { <span class="num">1.25</span> }
+    <span class="kw">var</span> <span class="prop">spacingUnit</span>: <span class="type">Double</span>    { <span class="num">4</span> }
+    <span class="kw">var</span> <span class="prop">radiusBase</span>: <span class="type">Double</span>     { <span class="num">6</span> }
+
+    <span class="cmt">// Dark variant — override only what changes</span>
+    <span class="kw">var</span> <span class="prop">dark</span>: (<span class="kw">any</span> <span class="type">ThemePatch</span>)? {
+        <span class="type">BrandDark</span>()
+    }
+}
+
+<span class="kw">struct</span> <span class="type">BrandDark</span>: <span class="type">ThemePatch</span> {
+    <span class="kw">var</span> <span class="prop">colorRoles</span>: [<span class="type">String</span>: <span class="type">ColorToken</span>]? {
+        [<span class="str">"surface"</span>: .<span class="fn">oklch</span>(<span class="num">0.15</span>, <span class="num">0.01</span>, <span class="num">240</span>),
+         <span class="str">"text"</span>:    .<span class="fn">oklch</span>(<span class="num">0.92</span>, <span class="num">0.0</span>,  <span class="num">0</span>)]
+    }
+}</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang">as-global.css</span>
+                            </div>
+                            <pre><code><span class="cmt">/* Theme → CSS custom properties */</span>
+
+<span class="kw">:root</span> {
+  <span class="prop">--as-surface</span>:
+    <span class="fn">oklch</span>(<span class="num">0.98</span> <span class="num">0.01</span> <span class="num">80</span>);
+  <span class="prop">--as-text</span>:
+    <span class="fn">oklch</span>(<span class="num">0.2</span> <span class="num">0.02</span> <span class="num">80</span>);
+  <span class="prop">--as-accent</span>:
+    <span class="fn">var</span>(<span class="str">--as-blue-600</span>);
+  <span class="prop">--as-border</span>:
+    <span class="kw">inherit</span>;
+  <span class="prop">--as-muted</span>:
+    <span class="fn">var</span>(<span class="str">--as-neutral-400</span>);
+  <span class="prop">--as-font-sans</span>:
+    Inter, system-ui;
+  <span class="prop">--as-font-mono</span>:
+    JetBrains Mono, monospace;
+  <span class="prop">--as-type-base</span>: <span class="num">16</span>px;
+  <span class="prop">--as-type-ratio</span>: <span class="num">1.25</span>;
+  <span class="prop">--as-spacing</span>: <span class="num">4</span>px;
+  <span class="prop">--as-radius</span>: <span class="num">6</span>px;
+}
+
+<span class="cmt">/* ThemePatch → dark mode */</span>
+<span class="kw">@media</span> (<span class="prop">prefers-color-scheme</span>: dark) {
+  <span class="kw">:root</span> {
+    <span class="prop">--as-surface</span>:
+      <span class="fn">oklch</span>(<span class="num">0.15</span> <span class="num">0.01</span> <span class="num">240</span>);
+    <span class="prop">--as-text</span>:
+      <span class="fn">oklch</span>(<span class="num">0.92</span> <span class="num">0.0</span> <span class="num">0</span>);
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                    <p class="dim" style="margin-top: 8px">
+                        Semantic roles: <code>surface</code>, <code>text</code>, <code>border</code>, <code>accent</code>, <code>muted</code>, <code>destructive</code>, <code>success</code>.
+                        Palette tokens: <code>.blue(600)</code>, <code>.neutral(200)</code>, <code>.red(500)</code>.
+                        OKLCH escape hatch: <code>.oklch(lightness, chroma, hue)</code>.
+                        <code>ThemePatch</code> overrides only changed values. Scales: <code>typeScaleBase</code>/<code>typeScaleRatio</code> for modular typography, <code>spacingUnit</code> for spacing, <code>radiusBase</code> for corners.
+                        Named theme persists via <code>as_theme</code> cookie — SSR and static agree without flash.
+                    </p>
+                </div>
 
                 <h2>Signal State Model</h2>
                 <p>
@@ -1849,22 +2227,88 @@ Resources/
                 <p class="dim">Browser-first: real forms, real links, platform UI primitives (dialog, popover, scroll restoration), browser storage and messaging standards. No user-exposed <code>Signal</code> type, no implicit global store, no runtime template parsing.</p>
 
                 <h2>Storage</h2>
-                <pre><code><span class="kw">let</span> <span class="prop">user</span> = <span class="kw">try await</span> store.<span class="fn">get</span>(<span class="type">Key</span>(<span class="str">"users"</span>, userId))
-<span class="kw">try await</span> store.<span class="fn">set</span>(<span class="type">Key</span>(<span class="str">"users"</span>, userId), <span class="prop">value</span>: user)
+                <p>
+                    One transactional KV store with hierarchical keys. <code>Store</code> protocol with async methods; <code>InMemoryStore</code> actor for development, FoundationDB for production.
+                </p>
 
-<span class="kw">for try await</span> <span class="prop">item</span> <span class="kw">in</span> store.<span class="fn">scan</span>(<span class="prop">prefix</span>: <span class="type">Key</span>(<span class="str">"users"</span>)) {
-    <span class="cmt">// consume item</span>
+                <!-- STORAGE: CRUD + Codable -->
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-global">Storage</span>
+                        <span class="section-title">CRUD &amp; Codable</span>
+                        <span class="section-desc">ScoreStorage · Key + Store protocol</span>
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">UserService.swift</span>
+                            </div>
+                            <pre><code><span class="cmt">// Hierarchical keys — variadic segments</span>
+<span class="kw">let</span> <span class="prop">key</span> = <span class="type">Key</span>(<span class="str">"users"</span>, userId, <span class="str">"profile"</span>)
+<span class="cmt">// key.description → "users.42.profile"</span>
+
+<span class="cmt">// Codable convenience — type-safe</span>
+<span class="kw">try await</span> store.<span class="fn">set</span>(user, <span class="prop">forKey</span>: key)
+<span class="kw">let</span> <span class="prop">user</span> = <span class="kw">try await</span> store.<span class="fn">get</span>(
+    <span class="type">User</span>.<span class="kw">self</span>, <span class="prop">forKey</span>: key
+)
+
+<span class="cmt">// TTL — auto-expiry for sessions</span>
+<span class="kw">try await</span> store.<span class="fn">set</span>(
+    token, <span class="prop">forKey</span>: sessionKey,
+    <span class="prop">ttl</span>: .<span class="fn">seconds</span>(<span class="num">3600</span>)
+)
+
+<span class="cmt">// Check existence without reading</span>
+<span class="kw">let</span> <span class="prop">exists</span> = <span class="kw">try await</span> store.<span class="fn">exists</span>(key)
+
+<span class="cmt">// Delete</span>
+<span class="kw">try await</span> store.<span class="fn">delete</span>(key)</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">Analytics.swift</span>
+                            </div>
+                            <pre><code><span class="cmt">// Prefix scan — ordered async stream</span>
+<span class="kw">for try await</span> (<span class="prop">key</span>, <span class="prop">data</span>) <span class="kw">in</span>
+    store.<span class="fn">scan</span>(<span class="prop">prefix</span>: <span class="type">Key</span>(<span class="str">"users"</span>))
+{
+    <span class="kw">let</span> <span class="prop">user</span> = <span class="kw">try</span> <span class="type">JSONDecoder</span>()
+        .<span class="fn">decode</span>(<span class="type">User</span>.<span class="kw">self</span>, <span class="prop">from</span>: data)
+    <span class="cmt">// iterate in key order</span>
 }
 
+<span class="cmt">// Atomic increment — returns new value</span>
+<span class="kw">let</span> <span class="prop">views</span> = <span class="kw">try await</span> store.<span class="fn">increment</span>(
+    <span class="type">Key</span>(<span class="str">"stats"</span>, <span class="str">"views"</span>), <span class="prop">by</span>: <span class="num">1</span>
+)
+
+<span class="cmt">// Transactions — snapshot isolation</span>
 <span class="kw">try await</span> store.<span class="fn">transaction</span> { <span class="prop">tx</span> <span class="kw">in</span>
-    tx.<span class="fn">set</span>(...)
-    tx.<span class="fn">delete</span>(...)
+    <span class="kw">let</span> <span class="prop">bal</span> = <span class="kw">try await</span> tx.<span class="fn">get</span>(
+        <span class="type">Int</span>.<span class="kw">self</span>, <span class="prop">forKey</span>: balanceKey
+    )
+    <span class="kw">try await</span> tx.<span class="fn">set</span>(
+        (bal ?? <span class="num">0</span>) - amount,
+        <span class="prop">forKey</span>: balanceKey
+    )
+    <span class="kw">try await</span> tx.<span class="fn">set</span>(
+        receipt, <span class="prop">forKey</span>: receiptKey
+    )
 }</code></pre>
-                <p class="dim">
-                    One transactional KV store. Ordered-key tuples (<code>tenant/collection/id</code>).
-                    FoundationDB in production, lightweight local engine for dev.
-                    Short bounded transactions, no blocking I/O in closures, idempotent mutations.
-                </p>
+                        </div>
+                    </div>
+                    <p class="dim" style="margin-top: 8px">
+                        <code>Store</code> protocol: <code>get</code>, <code>set</code> (with optional TTL), <code>delete</code>, <code>exists</code>, <code>scan</code>, <code>increment</code>, <code>transaction</code>.
+                        Codable convenience extensions for type-safe serialisation.
+                        <code>Key</code> is <code>Comparable</code> and <code>Hashable</code> with <code>hasPrefix</code> and <code>appending</code>.
+                        Short bounded transactions, no blocking I/O in closures, idempotent mutations.
+                        <code>InMemoryStore</code> for dev; FoundationDB for production.
+                    </p>
+                </div>
 
                 <h2>Delivery</h2>
                 <p>Score's end state: sole framework dependency for <code>new.sh</code> web apps. Current stack parity covers UI, CSS, HTTP server, auth (magic link, passkey, CSRF, rate limiting), markdown content, asset fingerprinting, analytics, and 30 UI components.</p>
