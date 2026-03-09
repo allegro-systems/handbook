@@ -1,6 +1,8 @@
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md) | [CLI PRD](cli-prd.md) | [Glossary](glossary.md) | [Dependencies](dependencies.md) | [Decisions](decisions.md) | [Changelog](changelog.md)
+# Allegro Score PRD
 
-_PRD • framework_
+_PRD · framework_
+
+---
 
 ## 1. Overview
 
@@ -42,6 +44,7 @@ Sources/
   Components/
   Models/
   Utilities/
+  Vendors/
 Package.swift
 Resources/
   Localizable.xcstrings
@@ -143,6 +146,7 @@ Sources/
   Components/
   Models/
   Utilities/
+  Vendors/
 Package.swift
 Resources/
   Localizable.xcstrings
@@ -160,6 +164,7 @@ Resources/
 - `calculator`
 - `minimal`
 - `localised`
+- `taskboard`
 
 Those templates are product examples, not empty stubs, and must reflect the canonical Score patterns for each use case.
 
@@ -228,8 +233,6 @@ Required constraints:
 
 ### 5.1 Static Bundle Structure
 
-Static output must follow these rules:
-
 - `as-global.css` contains reset and base token output shared across the build
 - `as-group-N.css` contains route-group or feature-group CSS only for the surfaces that need it
 - JS remains zero by default
@@ -269,11 +272,11 @@ Semantics:
 
 ## 6. CLI Contract
 
-Score CLI is the canonical execution interface for local development, local production builds, and remote deploy orchestration.
+Score CLI is the canonical execution interface for local development, local production builds, and remote deploy orchestration. Composer depends on Score CLI as its execution backbone. All CLI commands must remain compatible with both interactive terminal usage and programmatic invocation.
 
 ### 6.1 `score init`
 
-`score init` must:
+Generates a canonical Score project from a built-in template.
 
 - generate the canonical project structure
 - support selecting a built-in template interactively or by flag
@@ -282,7 +285,7 @@ Score CLI is the canonical execution interface for local development, local prod
 
 ### 6.2 `score dev`
 
-`score dev` must:
+Provides the local development workflow with file watching, recompilation, and preview.
 
 - watch project files
 - recompile on Swift file save and Composer structural edits
@@ -297,7 +300,7 @@ Toolchain behavior:
 
 ### 6.3 `score build`
 
-`score build` must:
+Performs full project compilation and produces deterministic build output.
 
 - fully compile the Swift project
 - produce deterministic output in `.build/score/`
@@ -306,7 +309,7 @@ Toolchain behavior:
 
 ### 6.4 `score deploy`
 
-`score deploy` must:
+Packages and submits the canonical project snapshot to the selected deploy target.
 
 - package and submit the canonical project snapshot to the selected deploy target (Stage by default)
 - invoke a remote `score build` on Stage using pinned toolchain and Score versions
@@ -314,16 +317,16 @@ Toolchain behavior:
 
 ### 6.5 Exit Codes
 
-CLI commands must use stable exit codes:
-
-- `0`: success
-- `1`: compile/build/deploy failure
-- `2`: usage or argument error
-- `3`: environment/toolchain prerequisite failure
+| Code | Meaning |
+| --- | --- |
+| `0` | Success |
+| `1` | Compile, build, or deploy failure |
+| `2` | Usage or argument error |
+| `3` | Environment or toolchain prerequisite failure |
 
 ### 6.6 Structured Error Output
 
-When JSON mode is enabled, command failures must emit machine-readable errors with this minimum schema:
+When JSON mode is enabled, command failures must emit machine-readable errors:
 
 ```json
 {
@@ -337,18 +340,24 @@ When JSON mode is enabled, command failures must emit machine-readable errors wi
 }
 ```
 
-`score dev`, `score build`, and `score deploy` must keep this schema backward-compatible for Composer integrations.
+| Code | Stage | Description |
+| --- | --- | --- |
+| `compile_error` | `build` | Swift compilation failure |
+| `link_error` | `build` | Linker failure |
+| `manifest_error` | `build` | Invalid or inconsistent manifest |
+| `deploy_error` | `deploy` | Remote deployment failure |
+| `toolchain_error` | `init`, `dev`, `build` | Missing or incompatible Swift toolchain |
+| `argument_error` | any | Invalid CLI arguments or flags |
+
+This schema must remain backward-compatible for Composer integrations.
+
+### 6.7 CLI Interface
+
+Score CLI tools are built with [Noora](https://noora.tuist.dev) for their terminal interfaces.
 
 ## 7. Deterministic Build Invariant
 
-Given:
-
-- identical project input
-- identical Score version
-- identical Swift toolchain version
-- identical build settings
-
-Score must produce byte-equivalent build outputs across compliant environments.
+Given identical project input, Score version, Swift toolchain version, and build settings, Score must produce byte-equivalent build outputs across compliant environments.
 
 Build systems must reject nondeterministic inputs and outputs that violate this invariant.
 
@@ -356,15 +365,12 @@ Build systems must reject nondeterministic inputs and outputs that violate this 
 
 Capability enforcement is mandatory across local and remote builds.
 
-Rules:
-
 - static-first behavior is the default for all projects
 - runtime capabilities may only be enabled when required by project features
 - persistence capability requires an explicit durability contract
 - deployment targets must validate the capability manifest before activation
 
 Stage and other deploy targets may use capabilities for runtime allocation, policy checks, and pricing tiers, but capability semantics are defined by Score, not by any host.
-
 
 ## 9. Runtime Model
 
@@ -375,9 +381,9 @@ Score runtime has two responsibilities:
 - server-side route resolution and complete HTML document assembly
 - browser-side enhancement for pages that require live behaviour
 
-The browser path must stay platform-first. Score should compose with the browser’s DOM, CSS, events, navigation, and storage primitives instead of replacing them with a second application runtime.
+The browser path must stay platform-first. Score should compose with the browser's DOM, CSS, events, navigation, and storage primitives instead of replacing them with a second application runtime.
 
-Score’s reactive behaviour must provide fine-grained, deterministic, glitch-free updates comparable to modern signal systems, while preserving:
+Score's reactive behaviour must provide fine-grained, deterministic, glitch-free updates comparable to modern signal systems, while preserving:
 
 - progressive enhancement
 - deterministic compile output
@@ -388,7 +394,7 @@ The reactive engine is an internal subsystem of `ScoreRuntime`. It is not expose
 
 ### 9.1 Server Runtime Baseline
 
-The first runtime milestone is not reactivity. It is correct server execution:
+The first runtime milestone is correct server execution:
 
 - route incoming requests through the existing `Application`, `Page`, and `Controller` contracts
 - render a page body through `ScoreHTML`
@@ -398,30 +404,235 @@ The first runtime milestone is not reactivity. It is correct server execution:
 
 This phase establishes the canonical browser document that later enhancement layers attach to.
 
-### 9.2 Browser Runtime Contract
+### 9.2 Browser Runtime — Three-Level Signal State Model
 
-For interactive pages, Score’s browser runtime is compiler-driven and signal-backed.
+For interactive pages, Score's browser runtime is compiler-driven and signal-backed. The compiler lowers Swift state declarations to JavaScript using the TC39 Signals polyfill (`signal-polyfill` npm package, until browser-native signals are available).
 
-Current direction:
+Score defines **three state scopes** that map directly to Swift protocol conformances:
 
-- `@State` lowers to `Signal.State`
-- `@Computed` lowers to `Signal.Computed`
-- `@Action` lowers to compiler-emitted JavaScript functions that perform state writes
-- `.on` lowers to DOM event listeners bound to those emitted functions
-- developers do not write effects directly; the compiler emits them for DOM bindings
+#### Application State (`Application` conformance)
 
-```js
-const count = new Signal.State(0)
-const doubled = new Signal.Computed(() => count.get() * 2)
-```
+Application-scoped `@State` compiles to **module-level `Signal.State` singletons** exported from `app.js`. Shared across all pages and elements for the entire application session.
 
-The initial implementation target is the TC39 Signals polyfill. When native browser signals become viable, Score may swap its internal engine without changing the public Swift authoring model.
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:6px;overflow:hidden;border:1px solid #2e2a22;font-family:'DM Mono',monospace;font-size:12px;line-height:1.7;">
+<div style="background:#13120f;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #2e2a22;background:#1a1814;">
+  <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#7a7060;">Score · Swift</span>
+  <span style="font-size:10px;color:#3d3830;letter-spacing:0.05em;">App.swift</span>
+</div>
+<pre style="padding:20px 16px;margin:0;overflow-x:auto;color:#e8e0d0;"><code><span style="color:#3d3830;font-style:italic;">// Application conformance — singleton</span>
+<span style="color:#3d3830;font-style:italic;">// shared across all pages and elements</span>
+
+<span style="color:#c8a96e;">@main</span>
+<span style="color:#c86e9e;">struct</span> <span style="color:#6e9ec8;">MyApp</span>: <span style="color:#6e9ec8;">Application</span> {
+    <span style="color:#c8a96e;">@State</span> <span style="color:#c86e9e;">var</span> <span style="color:#c8c0a8;">isDarkMode</span>: <span style="color:#6e9ec8;">Bool</span> = <span style="color:#c86e9e;">true</span>
+    <span style="color:#c8a96e;">@State</span> <span style="color:#c86e9e;">var</span> <span style="color:#c8c0a8;">currentUser</span>: <span style="color:#6e9ec8;">User?</span> = <span style="color:#c86e9e;">nil</span>
+
+    <span style="color:#c8a96e;">@Action</span>
+    <span style="color:#c86e9e;">func</span> <span style="color:#a09070;">toggleTheme</span>() {
+        isDarkMode.toggle()
+    }
+
+    <span style="color:#c8a96e;">@Action</span>
+    <span style="color:#c86e9e;">func</span> <span style="color:#a09070;">signIn</span>(<span style="color:#c8c0a8;">name</span>: <span style="color:#6e9ec8;">String</span>) {
+        currentUser = <span style="color:#6e9ec8;">User</span>(<span style="color:#c8c0a8;">name</span>: name)
+    }
+}</code></pre>
+</div>
+<div style="background:#13120f;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #2e2a22;background:#1a1814;">
+  <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#7a7060;">Compiled Output</span>
+  <span style="font-size:10px;color:#3d3830;letter-spacing:0.05em;">app.js</span>
+</div>
+<pre style="padding:20px 16px;margin:0;overflow-x:auto;color:#e8e0d0;"><code><span style="color:#3d3830;font-style:italic;">// Score runtime — app.js</span>
+<span style="color:#3d3830;font-style:italic;">// Auto-generated. Do not edit.</span>
+<span style="color:#c86e9e;">import</span> { <span style="color:#6e9ec8;">Signal</span> } <span style="color:#c86e9e;">from</span> <span style="color:#6ec88a;">"signal-polyfill"</span>;
+
+<span style="color:#3d3830;font-style:italic;">// Application: @State — module singleton</span>
+<span style="color:#c86e9e;">export const</span> <span style="color:#c8c0a8;">isDarkMode</span> =
+  <span style="color:#c86e9e;">new</span> <span style="color:#6e9ec8;">Signal</span>.<span style="color:#6e9ec8;">State</span>(<span style="color:#c86e9e;">true</span>);
+
+<span style="color:#c86e9e;">export const</span> <span style="color:#c8c0a8;">currentUser</span> =
+  <span style="color:#c86e9e;">new</span> <span style="color:#6e9ec8;">Signal</span>.<span style="color:#6e9ec8;">State</span>(<span style="color:#c86e9e;">null</span>);
+
+<span style="color:#3d3830;font-style:italic;">// @Action — plain setters</span>
+<span style="color:#c86e9e;">export function</span> <span style="color:#c8a96e;">toggleTheme</span>() {
+  isDarkMode.<span style="color:#c8a96e;">set</span>(!isDarkMode.<span style="color:#c8a96e;">get</span>());
+}
+
+<span style="color:#c86e9e;">export function</span> <span style="color:#c8a96e;">signIn</span>(name) {
+  currentUser.<span style="color:#c8a96e;">set</span>({ name });
+}</code></pre>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:8px;padding:8px 0;font-family:'DM Mono',monospace;font-size:11px;color:#3d3830;">
+  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6e9ec8;"></span>
+  <span style="color:#7a7060;">Lifetime:</span> Entire application session. Never torn down during navigation.
+</div>
+
+#### Page State (`Page` conformance)
+
+Page-scoped `@State` compiles to **module-scoped (non-exported) `Signal.State`** in per-page JS modules. State is torn down on navigation away from the page.
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:6px;overflow:hidden;border:1px solid #2e2a22;font-family:'DM Mono',monospace;font-size:12px;line-height:1.7;">
+<div style="background:#13120f;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #2e2a22;background:#1a1814;">
+  <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#7a7060;">Score · Swift</span>
+  <span style="font-size:10px;color:#3d3830;letter-spacing:0.05em;">Shop.swift</span>
+</div>
+<pre style="padding:20px 16px;margin:0;overflow-x:auto;color:#e8e0d0;"><code><span style="color:#3d3830;font-style:italic;">// Page conformance — scoped to this</span>
+<span style="color:#3d3830;font-style:italic;">// page's lifetime, torn down on navigation</span>
+
+<span style="color:#c86e9e;">struct</span> <span style="color:#6e9ec8;">ShopPage</span>: <span style="color:#6e9ec8;">Page</span> {
+    <span style="color:#c8a96e;">@State</span> <span style="color:#c86e9e;">var</span> <span style="color:#c8c0a8;">activeFilter</span>: <span style="color:#6e9ec8;">String</span> = <span style="color:#6ec88a;">"all"</span>
+
+    <span style="color:#c8a96e;">@Computed</span>
+    <span style="color:#c86e9e;">var</span> <span style="color:#c8c0a8;">visibleProducts</span>: [<span style="color:#6e9ec8;">Product</span>] {
+        <span style="color:#c86e9e;">guard</span> activeFilter != <span style="color:#6ec88a;">"all"</span>
+        <span style="color:#c86e9e;">else</span> { <span style="color:#c86e9e;">return</span> products }
+        <span style="color:#c86e9e;">return</span> products.<span style="color:#a09070;">filter</span> {
+            $0.category == activeFilter
+        }
+    }
+
+    <span style="color:#c8a96e;">@Action</span>
+    <span style="color:#c86e9e;">func</span> <span style="color:#a09070;">setFilter</span>(<span style="color:#c8c0a8;">_</span> f: <span style="color:#6e9ec8;">String</span>) {
+        activeFilter = f
+    }
+}</code></pre>
+</div>
+<div style="background:#13120f;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #2e2a22;background:#1a1814;">
+  <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#7a7060;">Compiled Output</span>
+  <span style="font-size:10px;color:#3d3830;letter-spacing:0.05em;">shop.js</span>
+</div>
+<pre style="padding:20px 16px;margin:0;overflow-x:auto;color:#e8e0d0;"><code><span style="color:#3d3830;font-style:italic;">// Score runtime — shop.js</span>
+<span style="color:#3d3830;font-style:italic;">// Auto-generated. Do not edit.</span>
+<span style="color:#c86e9e;">import</span> { <span style="color:#6e9ec8;">Signal</span> } <span style="color:#c86e9e;">from</span> <span style="color:#6ec88a;">"signal-polyfill"</span>;
+
+<span style="color:#3d3830;font-style:italic;">// Page: @State — module-scoped, not exported</span>
+<span style="color:#c86e9e;">const</span> <span style="color:#c8c0a8;">activeFilter</span> =
+  <span style="color:#c86e9e;">new</span> <span style="color:#6e9ec8;">Signal</span>.<span style="color:#6e9ec8;">State</span>(<span style="color:#6ec88a;">"all"</span>);
+
+<span style="color:#3d3830;font-style:italic;">// @Computed — derived, memoised</span>
+<span style="color:#c86e9e;">const</span> <span style="color:#c8c0a8;">visibleProducts</span> =
+  <span style="color:#c86e9e;">new</span> <span style="color:#6e9ec8;">Signal</span>.<span style="color:#6e9ec8;">Computed</span>(() => {
+    <span style="color:#c86e9e;">const</span> f = activeFilter.<span style="color:#c8a96e;">get</span>();
+    <span style="color:#c86e9e;">if</span> (f === <span style="color:#6ec88a;">"all"</span>) <span style="color:#c86e9e;">return</span> products;
+    <span style="color:#c86e9e;">return</span> products.<span style="color:#c8a96e;">filter</span>(
+      p => p.category === f
+    );
+  });
+
+<span style="color:#3d3830;font-style:italic;">// @Action</span>
+<span style="color:#c86e9e;">export function</span> <span style="color:#c8a96e;">setFilter</span>(f) {
+  activeFilter.<span style="color:#c8a96e;">set</span>(f);
+}</code></pre>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:8px;padding:8px 0;font-family:'DM Mono',monospace;font-size:11px;color:#3d3830;">
+  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c86e9e;"></span>
+  <span style="color:#7a7060;">Lifetime:</span> Page mount to unmount. Torn down on navigation.
+</div>
+
+#### Element State (`Element` conformance)
+
+Element-scoped `@State` compiles to **instance-scoped `Signal.State` inside a factory function**. Each DOM mount gets its own isolated signal graph.
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:6px;overflow:hidden;border:1px solid #2e2a22;font-family:'DM Mono',monospace;font-size:12px;line-height:1.7;">
+<div style="background:#13120f;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #2e2a22;background:#1a1814;">
+  <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#7a7060;">Score · Swift</span>
+  <span style="font-size:10px;color:#3d3830;letter-spacing:0.05em;">QuantityPicker.swift</span>
+</div>
+<pre style="padding:20px 16px;margin:0;overflow-x:auto;color:#e8e0d0;"><code><span style="color:#3d3830;font-style:italic;">// Element conformance — each instance</span>
+<span style="color:#3d3830;font-style:italic;">// gets its own isolated signal graph</span>
+
+<span style="color:#c86e9e;">struct</span> <span style="color:#6e9ec8;">QuantityPicker</span>: <span style="color:#6e9ec8;">Element</span> {
+    <span style="color:#c86e9e;">let</span> <span style="color:#c8c0a8;">product</span>: <span style="color:#6e9ec8;">Product</span>
+    <span style="color:#c86e9e;">let</span> <span style="color:#c8c0a8;">max</span>: <span style="color:#6e9ec8;">Int</span> = <span style="color:#c8956e;">10</span>
+
+    <span style="color:#c8a96e;">@State</span> <span style="color:#c86e9e;">var</span> <span style="color:#c8c0a8;">count</span>: <span style="color:#6e9ec8;">Int</span> = <span style="color:#c8956e;">0</span>
+
+    <span style="color:#c8a96e;">@Computed</span>
+    <span style="color:#c86e9e;">var</span> <span style="color:#c8c0a8;">canIncrement</span>: <span style="color:#6e9ec8;">Bool</span> {
+        count &lt; max
+    }
+
+    <span style="color:#c8a96e;">@Action</span>
+    <span style="color:#c86e9e;">func</span> <span style="color:#a09070;">increment</span>() {
+        <span style="color:#c86e9e;">guard</span> canIncrement <span style="color:#c86e9e;">else</span> { <span style="color:#c86e9e;">return</span> }
+        count += <span style="color:#c8956e;">1</span>
+    }
+
+    <span style="color:#c8a96e;">@Action</span>
+    <span style="color:#c86e9e;">func</span> <span style="color:#a09070;">decrement</span>() {
+        <span style="color:#c86e9e;">guard</span> count > <span style="color:#c8956e;">0</span> <span style="color:#c86e9e;">else</span> { <span style="color:#c86e9e;">return</span> }
+        count -= <span style="color:#c8956e;">1</span>
+    }
+}</code></pre>
+</div>
+<div style="background:#13120f;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #2e2a22;background:#1a1814;">
+  <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#7a7060;">Compiled Output</span>
+  <span style="font-size:10px;color:#3d3830;letter-spacing:0.05em;">quantity-picker.js</span>
+</div>
+<pre style="padding:20px 16px;margin:0;overflow-x:auto;color:#e8e0d0;"><code><span style="color:#3d3830;font-style:italic;">// Score runtime — quantity-picker.js</span>
+<span style="color:#3d3830;font-style:italic;">// Auto-generated. Do not edit.</span>
+<span style="color:#c86e9e;">import</span> { <span style="color:#6e9ec8;">Signal</span> } <span style="color:#c86e9e;">from</span> <span style="color:#6ec88a;">"signal-polyfill"</span>;
+
+<span style="color:#3d3830;font-style:italic;">// Element: factory — called per mount</span>
+<span style="color:#c86e9e;">export function</span> <span style="color:#c8a96e;">mountQuantityPicker</span>(
+  el, { product, max = <span style="color:#c8956e;">10</span> }
+) {
+  <span style="color:#3d3830;font-style:italic;">// Element: @State — instance-scoped</span>
+  <span style="color:#c86e9e;">const</span> <span style="color:#c8c0a8;">count</span> =
+    <span style="color:#c86e9e;">new</span> <span style="color:#6e9ec8;">Signal</span>.<span style="color:#6e9ec8;">State</span>(<span style="color:#c8956e;">0</span>);
+
+  <span style="color:#3d3830;font-style:italic;">// @Computed</span>
+  <span style="color:#c86e9e;">const</span> <span style="color:#c8c0a8;">canIncrement</span> =
+    <span style="color:#c86e9e;">new</span> <span style="color:#6e9ec8;">Signal</span>.<span style="color:#6e9ec8;">Computed</span>(
+      () => count.<span style="color:#c8a96e;">get</span>() < max
+    );
+
+  <span style="color:#3d3830;font-style:italic;">// @Action</span>
+  <span style="color:#c86e9e;">const</span> <span style="color:#c8a96e;">increment</span> = () => {
+    <span style="color:#c86e9e;">if</span> (canIncrement.<span style="color:#c8a96e;">get</span>())
+      count.<span style="color:#c8a96e;">set</span>(count.<span style="color:#c8a96e;">get</span>() + <span style="color:#c8956e;">1</span>);
+  };
+  <span style="color:#c86e9e;">const</span> <span style="color:#c8a96e;">decrement</span> = () => {
+    <span style="color:#c86e9e;">if</span> (count.<span style="color:#c8a96e;">get</span>() > <span style="color:#c8956e;">0</span>)
+      count.<span style="color:#c8a96e;">set</span>(count.<span style="color:#c8a96e;">get</span>() - <span style="color:#c8956e;">1</span>);
+  };
+
+  <span style="color:#3d3830;font-style:italic;">// Wire DOM + return teardown</span>
+  <span style="color:#c86e9e;">return</span> { count, canIncrement,
+           increment, decrement };
+}</code></pre>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:8px;padding:8px 0;font-family:'DM Mono',monospace;font-size:11px;color:#3d3830;">
+  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6ec88a;"></span>
+  <span style="color:#7a7060;">Lifetime:</span> Element mount to unmount. Each instance is fully isolated.
+</div>
+
+#### Lowering Summary
+
+| Swift construct | JS output | Scope |
+|---|---|---|
+| `@State` on `Application` | `export const x = new Signal.State(v)` in `app.js` | Module singleton (global) |
+| `@State` on `Page` | `const x = new Signal.State(v)` in page module | Module-scoped (page lifetime) |
+| `@State` on `Element` | `const x = new Signal.State(v)` inside factory | Instance-scoped (per mount) |
+| `@Computed` | `new Signal.Computed(() => ...)` | Same scope as containing type |
+| `@Action` | Plain function performing `.set()` calls | Same scope as containing type |
+| `.on` event bindings | DOM event listeners bound to emitted functions | Compiler-generated |
+
+Developers do not write effects directly; the compiler emits them for DOM bindings.
 
 ### 9.3 DOM and Inspection Contract
-
-Score no longer treats compiler-owned debug attributes as the primary production runtime contract.
-
-Instead:
 
 | Concern | Production mechanism | Development mechanism |
 |----------|------------|------------|
@@ -430,75 +641,40 @@ Instead:
 | Event wiring | compiler-emitted listener attachment | same as production |
 | Component/source inspection | none required for correctness | debug annotations may be emitted for devtools and source navigation |
 
-`data-as-*` is not a required production contract for the new runtime plan. Debug-oriented attributes may exist in development, but production correctness must not depend on them.
+`data-as-*` is not a required production contract. Debug-oriented attributes may exist in development, but production correctness must not depend on them.
 
 ### 9.4 Reactive Invariants
 
-The runtime must guarantee the following invariants.
-
 #### 1. Fine-Grained Dependency Tracking
 
-Derived values and DOM bindings must track dependencies based on actual signal reads during execution.
-
-If a computed value conditionally reads different signals, the dependency graph must update dynamically.
+Derived values and DOM bindings must track dependencies based on actual signal reads during execution. If a computed value conditionally reads different signals, the dependency graph must update dynamically.
 
 #### 2. Batched Updates
 
-Multiple writes within the same microtask must:
-
-- Coalesce into a single dependency propagation pass.
-- Trigger DOM updates only after state stabilises.
-
-There must be no cascading synchronous DOM mutation per `.set()` call.
+Multiple writes within the same microtask must coalesce into a single dependency propagation pass. DOM updates trigger only after state stabilises. No cascading synchronous DOM mutation per `.set()` call.
 
 #### 3. Deterministic Effect Ordering
 
-Reactive effects must execute in a stable and deterministic order:
-
-- Parent scopes before children.
-- Earlier bindings before later bindings within a scope.
-
-The runtime must avoid nondeterministic ordering caused by subscription timing.
+Reactive effects must execute in a stable and deterministic order: parent scopes before children, earlier bindings before later bindings within a scope.
 
 #### 4. Glitch-Free Derived State
 
-Computed values must never observe partially-updated state.
-
-Derived computations must observe either:
-
-- previous stable graph
-- or next stable graph
-
-Never an intermediate inconsistent mix.
+Computed values must never observe partially-updated state. Derived computations observe either the previous stable graph or the next stable graph, never an intermediate mix.
 
 #### 5. Disposal Semantics
 
-When DOM nodes are removed due to:
+When DOM nodes are removed (conditional rendering, list diffing, scope unmounting), all reactive bindings associated with that subtree must be disposed. The runtime must not leak subscriptions.
 
-- conditional rendering
-- list diffing
-- scope unmounting
+#### 6. Scope Isolation
 
-All reactive bindings associated with that subtree must be disposed.
-
-The runtime must not leak subscriptions.
-
-#### 6. Page-Local Isolation
-
-Reactive graphs are isolated to the page runtime instance produced by the compiler.
-
-No implicit global graph may emerge from ad-hoc runtime registration.
-
-Shared state across tabs, workers, or documents must be an explicit higher-level capability built on browser standards rather than an accidental property of the reactive engine.
+Application state is explicitly global (module-level singletons). Page state is module-scoped and torn down on navigation. Element state is instance-scoped and torn down on unmount. No implicit global graph may emerge from ad-hoc runtime registration.
 
 ### 9.5 Browser-First Principles
-
-Score should prefer existing browser behaviour before inventing framework abstractions:
 
 - HTML forms should stay real forms
 - links and navigation should stay real links unless runtime interception is explicitly enabled
 - browser-managed UI such as dialog, disclosure, popover, focus, history, and scroll restoration should be used where it fits
-- persistence and multi-context coordination should use browser storage and messaging standards where possible before adding Score-owned protocols
+- persistence and multi-context coordination should use browser storage and messaging standards where possible
 - source maps, module loading, and event dispatch should follow existing browser conventions
 
 ### 9.6 Non-Goals of the Runtime Model
@@ -510,11 +686,7 @@ Score should prefer existing browser behaviour before inventing framework abstra
 - No runtime template parsing.
 - No second client runtime model separate from the browser platform.
 
-Reactivity remains a runtime execution detail behind compile-time generated DOM bindings.
-
 ### 9.7 Success Criteria for Runtime Behaviour
-
-Score’s runtime model is considered successful when:
 
 - Complex UI state graphs feel mechanically boring to implement.
 - Developers never think about subscription management.
@@ -522,8 +694,6 @@ Score’s runtime model is considered successful when:
 - Multiple state writes never cause flicker.
 - The browser remains the source of truth for platform behaviour.
 - Development inspection is strong without imposing production runtime overhead.
-
----
 
 ## 10. Planned Subsystems
 
@@ -536,21 +706,11 @@ These remain valid parts of the product direction, but their exact APIs are inte
 - first-party UI components
 - vendor integrations
 
-They should be added to the handbook in detail only when the codebase has a concrete implementation worth documenting.
-
 ### 10.1 ScoreRuntime Delivery Order
-
-The checked-in runtime plan is phased:
 
 1. Server runtime, CSS class injection, and full document assembly.
 2. Browser runtime bundle, reactive lowering for `@State` / `@Computed` / `@Action`, and event binding.
 3. Development diagnostics such as source maps, devtools, and error overlays.
-
-This order is intentional:
-
-- it fixes the current HTML/CSS/runtime integration gap first
-- it keeps the browser execution model tied to standards-based DOM and JavaScript behaviour
-- it delays speculative interop surfaces until the core runtime contract is proven
 
 ### 10.2 Runtime WASM Interop
 
@@ -563,54 +723,11 @@ Requirements:
 - deterministic module initialization and lifecycle within runtime scopes
 - ergonomic invocation from `.on` modifiers without manual bridge plumbing
 
-Conceptual usage shape (illustrative, not syntax-locked):
-
-```swift
-@main
-struct App: Application {
-    var wasmModules: [WASMModule] {
-        [
-            .named("image", path: "./wasm/image.wasm")
-        ]
-    }
-}
-
-struct ProfilePage: Page {
-    var body: some Node {
-        button("Optimize")
-            .on(.click, .wasm("image.optimize", args: [.string("avatar")]))
-    }
-}
-```
-
-Interop contract:
-
-- invocation from `.on` must be one-line and type-safe at the callsite
-- argument and return value marshalling must use explicit codecs
-- runtime failures must surface as structured diagnostics compatible with Score tooling
-- module access must remain sandboxed and capability-gated
-
-Non-goals for this phase:
-
-- introducing a second UI/runtime model for WASM
-- bypassing reactive/event semantics through ad-hoc host hooks
-- exposing unstable low-level memory APIs as the primary developer surface
-
 ### 10.3 FoundationDB-Backed Transactional KV Store
 
-Score uses a single transactional key-value database abstraction for all persistent state.
-
-This is the definitive persistence methodology for Score.
-
-- Production backing store: FoundationDB.
-- Local backend: lightweight API-compatible engine preserving transactional semantics.
-- legacy storage module boundaries are transitional only and must converge into this single storage contract.
-
-The model is intentionally aligned with the Deno KV pattern: a simple KV API locally and FoundationDB-backed semantics in production.
+Score uses a single transactional key-value database abstraction for all persistent state. Production backing store: FoundationDB. Local backend: lightweight API-compatible engine preserving transactional semantics.
 
 ### 10.4 Locked Storage API Surface
-
-The storage contract is intentionally minimal and stable:
 
 - `get(key)`
 - `set(key, value)`
@@ -618,8 +735,6 @@ The storage contract is intentionally minimal and stable:
 - `scan(range | prefix)`
 - transactional atomic operations
 - strong serializability guarantees for committed transaction results
-
-Illustrative shape:
 
 ```swift
 let user = try await store.get(Key("users", userId))
@@ -635,97 +750,42 @@ try await store.transaction { tx in
 }
 ```
 
-Atomic mutations such as increments and conditional checks must execute only within a transaction scope.
-
 ### 10.5 Engine Layers
 
-Production (`FoundationDB`):
+Production (`FoundationDB`): strict serializability, ACID transactions, replication, automatic sharding.
 
-- strict serializability and ACID transactions
-- replication and automatic sharding
-- horizontal scale with consistent transaction semantics
-
-Local development backend:
-
-- API-compatible local engine (for example in-memory or SQLite-backed)
-- preserves transaction atomicity and key ordering semantics at dev scale
-- optimized for local iteration, not distributed throughput
+Local development: API-compatible local engine, preserves transaction atomicity and key ordering at dev scale.
 
 ### 10.6 Data Modeling Constraints
 
-Score storage is ordered-key based. Canonical key strategy uses structured tuples such as:
+Score storage is ordered-key based. Canonical key strategy uses structured tuples: `tenant / collection / recordId`. Secondary indexes are explicit, declarative layers on top of the KV API.
 
-- `tenant / collection / recordId`
-
-This enables deterministic range scans, tenant isolation, and conflict minimization.
-
-Implementers must not rely on arbitrary filtering or query planners inside the storage core.
-
-### 10.7 Secondary Index Methodology
-
-Secondary indexes are explicit, declarative layers on top of the KV API.
-
-Example:
-
-- `index_by_email / email / userId -> ""`
-
-Lookup flow:
-
-1. Scan index prefix.
-2. Resolve primary keys.
-3. Fetch primary records.
-
-Primary record writes and index writes must commit in the same transaction.
-
-### 10.8 Transaction and Conflict Discipline
-
-To keep behavior predictable in distributed deployments, storage implementations must enforce:
+### 10.7 Transaction and Conflict Discipline
 
 - short bounded transactions
 - no blocking I/O inside transaction closures
-- explicit retry policy for transient conflicts with bounded exponential backoff and jitter
+- explicit retry policy with bounded exponential backoff and jitter
 - idempotent mutation paths for retry-safe behavior
 - narrow key ranges to avoid hot-key contention
 
-### 10.9 Non-Goals in the Storage Core
-
-The core storage layer explicitly excludes:
+### 10.8 Non-Goals in the Storage Core
 
 - SQL or ad-hoc query languages
 - implicit joins
 - automatic query planners
 - relational schema migration systems
 
-A relational or SQL-facing layer may be added later, but only as an explicit layer on top of the KV contract without expanding the core persistence surface.
+A relational layer may be added later on top of the KV contract.
 
-### 10.10 Deployment and Operations Requirements
-
-Production infrastructure requirements:
-
-- FoundationDB cluster operated as shared persistent backend for Score runtimes
-- regular backup/snapshot policy
-- monitoring for throughput, latency, and conflict rates
-- documented failover and high-availability topology
-
-Local requirements:
-
-- configurable in-memory or lightweight on-disk backend
-- transactional and atomic semantic parity with production contract
-
-### 10.11 Future Real-Time Extensions
+### 10.9 Future Real-Time Extensions
 
 Watch/observe primitives may be added later as an optional capability for change propagation to real-time clients.
 
-Any such feature must remain layered on top of the same transactional KV contract.
-
-
 ## 11. Full-Stack Web Parity
 
-Score's intended end state is to be the sole framework dependency for web applications built by the monthly creative build process (`new.sh`). The following capabilities are required to replace the current SolidJS/Axum/Cloudflare stack for full-stack web apps.
+Score's intended end state is to be the sole framework dependency for web applications built by the monthly creative build process (`new.sh`).
 
 ### 11.1 Current Coverage
-
-Score already covers these areas of the `new.sh` web stack:
 
 | `new.sh` capability | Score equivalent | Status |
 |---|---|---|
@@ -745,8 +805,6 @@ Score already covers these areas of the `new.sh` web stack:
 
 ### 11.2 Missing Capabilities
 
-These `new.sh` stack capabilities have no Score equivalent yet:
-
 | `new.sh` capability | Required Score module | Priority |
 |---|---|---|
 | Drag and drop | ScoreUI `DragSource`/`DropTarget`/`Sortable` | High |
@@ -765,23 +823,19 @@ These `new.sh` stack capabilities have no Score equivalent yet:
 
 ### 11.3 Delivery Order
 
-Full-stack parity should follow this order:
-
-1. **CLI tooling** — `score init`, `score dev`, `score build`, `score deploy` (prerequisite for everything)
-2. **Core middleware** — CORS, compression, file uploads (unblocks real app development)
+1. **CLI tooling** — `score init`, `score dev`, `score build`, `score deploy`
+2. **Core middleware** — CORS, compression, file uploads
 3. **Data layer** — `ScoreData` relational adapter with SQLite local / PostgreSQL production
-4. **Auth expansion** — JWT, OAuth2/OIDC (unblocks social login and API auth)
-5. **Interactivity** — Drag and drop, WebSocket (unblocks rich UIs)
-6. **Payments** — Stripe integration (unblocks SaaS templates)
-7. **DX** — Testing framework, structured logging (unblocks production confidence)
+4. **Auth expansion** — JWT, OAuth2/OIDC
+5. **Interactivity** — Drag and drop, WebSocket
+6. **Payments** — Stripe integration
+7. **DX** — Testing framework, structured logging
 
 ### 11.4 Success Criteria
 
-Score achieves full-stack web parity when:
-
 - `score init saas` produces a runnable SaaS starter with auth, payments, and CRUD
-- The monthly creative build (`new.sh`) can produce web apps using only Score without fallback to SolidJS/Axum
-- All `score init` templates (blog, marketing, docs, saas, social, static, calculator, minimal, localised) are production-quality Score applications
+- The monthly creative build (`new.sh`) can produce web apps using only Score
+- All `score init` templates are production-quality Score applications
 
 ## 12. Non-Goals for This Phase
 
@@ -796,10 +850,6 @@ Score achieves full-stack web parity when:
 - handbook claims remain honest relative to the package contents
 - new modules graduate from placeholder to documented subsystem only when code supports it
 
-Previous: [Ecosystem PRD](ecosystem-prd.md)
-Next: [Allegro Stage PRD](stage-prd.md)
-
-
 ## 14. Post-v1 Repository Policy
 
 At the moment `v1.0.0` is released, the Score repository must move to maintenance controls:
@@ -808,11 +858,4 @@ At the moment `v1.0.0` is released, the Score repository must move to maintenanc
 2. Pull requests are the only path to merge into `main`.
 3. All PRs targeting `main` must pass `.github/workflows/ci.yml`.
 4. Force pushes are disabled on `main`.
-5. Local `--no-verify` bypass is not accepted as a merge path because server-side required checks remain mandatory.
-
-Implementation in GitHub branch protection/rulesets:
-
-- Require pull request before merging.
-- Require status checks to pass from `ci.yml`.
-- Restrict who can push to `main` (or block pushes entirely except merge queue/bot if used).
-- Disallow force pushes.
+5. Local `--no-verify` bypass is not accepted as a merge path.

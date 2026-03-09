@@ -1,8 +1,8 @@
 # Allegro Stage PRD
 
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md) | [CLI PRD](cli-prd.md) | [Glossary](glossary.md) | [Dependencies](dependencies.md) | [Decisions](decisions.md) | [Changelog](changelog.md)
+_PRD · hosting_
 
-_PRD • hosting_
+---
 
 ## 1. Overview
 
@@ -51,6 +51,3 @@ The exact CLI and dashboard surface should be documented once implementation beg
 - becoming a general JavaScript hosting platform
 - forcing users into Score to use Stage
 - recreating mature infrastructure primitives without a clear benefit
-
-Previous: [Allegro Score PRD](score-prd.md)
-Next: [Allegro Libretto PRD](libretto-prd.md)

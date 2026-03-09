@@ -1,8 +1,8 @@
 # Allegro Composer PRD
 
-[Handbook Index](README.md) | [Progress](progress.md) | [Systems Manifesto](manifesto.md) | [Design Philosophy](design-philosophy.md) | [Ecosystem PRD](ecosystem-prd.md) | [Allegro Score PRD](score-prd.md) | [Allegro Stage PRD](stage-prd.md) | [Allegro Libretto PRD](libretto-prd.md) | [Allegro Site PRD](allegro-site-prd.md) | [Allegro Composer PRD](composer-prd.md) | [CLI PRD](cli-prd.md) | [Glossary](glossary.md) | [Dependencies](dependencies.md) | [Decisions](decisions.md) | [Changelog](changelog.md)
+_PRD · visual editor_
 
-_PRD • visual editor_
+---
 
 ## 1. Overview
 
@@ -152,6 +152,3 @@ Composer must not:
 - Local preview is fast and reliable for both code and visual edits.
 - Deploy builds are reproducible and deterministic on Stage.
 - Produced artifacts remain portable beyond Stage hosting.
-
-Previous: [Allegro Site PRD](allegro-site-prd.md)
-Next: [Progress](progress.md)
