@@ -1,0 +1,2101 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Allegro Handbook</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap");
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            :root {
+                --bg: #0f0e0c;
+                --surface: #1a1814;
+                --surface2: #242018;
+                --border: #2e2a22;
+                --text: #e8e0d0;
+                --text-dim: #7a7060;
+                --text-dimmer: #3d3830;
+                --accent: #c8a96e;
+                --accent-dim: #7a6540;
+                --global-tag: #6e9ec8;
+                --page-tag: #c86e9e;
+                --component-tag: #6ec88a;
+                --code-bg: #13120f;
+                --radius: 6px;
+            }
+
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: "DM Mono", monospace;
+                font-size: 13px;
+                line-height: 1.6;
+                min-height: 100vh;
+            }
+
+            /* NAV */
+            nav {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                padding: 0 24px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                overflow-x: auto;
+            }
+            .nav-brand {
+                font-family: "Fraunces", serif;
+                font-size: 16px;
+                font-weight: 300;
+                color: var(--text);
+                margin-right: 24px;
+                padding: 14px 0;
+                white-space: nowrap;
+                letter-spacing: -0.3px;
+            }
+            .nav-brand span {
+                color: var(--text-dim);
+                font-size: 12px;
+                font-family: "DM Mono", monospace;
+            }
+            .nav-tab {
+                padding: 14px 16px;
+                font-family: "DM Mono", monospace;
+                font-size: 11px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--text-dim);
+                background: none;
+                border: none;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                transition:
+                    color 0.15s,
+                    border-color 0.15s;
+                white-space: nowrap;
+            }
+            .nav-tab:hover {
+                color: var(--text);
+            }
+            .nav-tab.active {
+                color: var(--accent);
+                border-bottom-color: var(--accent);
+            }
+
+            /* MAIN */
+            .wrapper {
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 48px 24px;
+            }
+            section {
+                display: none;
+            }
+            section.active {
+                display: block;
+            }
+
+            /* TYPOGRAPHY */
+            h1 {
+                font-family: "Fraunces", serif;
+                font-size: 32px;
+                font-weight: 300;
+                letter-spacing: -0.5px;
+                color: var(--text);
+                margin-bottom: 8px;
+            }
+            h2 {
+                font-family: "Fraunces", serif;
+                font-size: 22px;
+                font-weight: 300;
+                color: var(--text);
+                margin: 48px 0 16px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid var(--border);
+            }
+            h2:first-child {
+                margin-top: 0;
+            }
+            h3 {
+                font-family: "Fraunces", serif;
+                font-size: 17px;
+                font-weight: 300;
+                color: var(--text);
+                margin: 32px 0 12px;
+            }
+            h4 {
+                font-size: 12px;
+                font-weight: 500;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--text-dim);
+                margin: 24px 0 8px;
+            }
+            .subtitle {
+                color: var(--text-dim);
+                font-size: 12px;
+                margin-bottom: 40px;
+                letter-spacing: 0.05em;
+            }
+            p {
+                margin: 12px 0;
+                color: var(--text);
+            }
+            p.dim {
+                color: var(--text-dim);
+            }
+            strong {
+                font-weight: 500;
+                color: var(--text);
+            }
+            em {
+                font-style: italic;
+                color: var(--text-dim);
+            }
+            a {
+                color: var(--accent);
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+
+            ul,
+            ol {
+                margin: 8px 0 8px 20px;
+                color: var(--text);
+            }
+            li {
+                margin: 4px 0;
+            }
+            li::marker {
+                color: var(--text-dimmer);
+            }
+
+            /* TAGS */
+            .tag {
+                display: inline-block;
+                font-size: 10px;
+                font-weight: 500;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                padding: 3px 8px;
+                border-radius: 3px;
+            }
+            .tag-global {
+                background: rgba(110, 158, 200, 0.12);
+                color: var(--global-tag);
+                border: 1px solid rgba(110, 158, 200, 0.25);
+            }
+            .tag-page {
+                background: rgba(200, 110, 158, 0.12);
+                color: var(--page-tag);
+                border: 1px solid rgba(200, 110, 158, 0.25);
+            }
+            .tag-component {
+                background: rgba(110, 200, 138, 0.12);
+                color: var(--component-tag);
+                border: 1px solid rgba(110, 200, 138, 0.25);
+            }
+            .tag-accent {
+                background: rgba(200, 169, 110, 0.12);
+                color: var(--accent);
+                border: 1px solid rgba(200, 169, 110, 0.25);
+            }
+
+            /* TABLES */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            th {
+                text-align: left;
+                padding: 10px 14px;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                color: var(--text-dim);
+                font-size: 10px;
+                font-weight: 500;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+            }
+            td {
+                padding: 8px 14px;
+                border-bottom: 1px solid var(--border);
+                color: var(--text-dim);
+            }
+            td:first-child {
+                color: var(--text);
+            }
+            tr:last-child td {
+                border-bottom: none;
+            }
+            .table-wrap {
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                overflow: hidden;
+                padding: 0;
+            }
+
+            /* CODE */
+            code {
+                font-family: "DM Mono", monospace;
+                font-size: 12px;
+                background: var(--code-bg);
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: var(--accent);
+            }
+            pre {
+                background: var(--code-bg);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 20px 16px;
+                overflow-x: auto;
+                font-family: "DM Mono", monospace;
+                font-size: 12px;
+                line-height: 1.7;
+                margin: 12px 0;
+            }
+            pre code {
+                background: none;
+                padding: 0;
+            }
+
+            /* SPLIT PANE */
+            .split {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 2px;
+                border-radius: var(--radius);
+                overflow: hidden;
+                border: 1px solid var(--border);
+                margin: 12px 0;
+            }
+            .pane {
+                background: var(--code-bg);
+            }
+            .pane-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 16px;
+                border-bottom: 1px solid var(--border);
+                background: var(--surface);
+            }
+            .pane-label {
+                font-size: 10px;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--text-dim);
+            }
+            .pane-lang {
+                font-size: 10px;
+                color: var(--text-dimmer);
+                letter-spacing: 0.05em;
+            }
+            .pane pre {
+                border: none;
+                border-radius: 0;
+                margin: 0;
+            }
+
+            /* SCOPE LIFETIME */
+            .scope-lifetime {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 0;
+                font-size: 11px;
+                color: var(--text-dimmer);
+            }
+            .scope-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            .scope-lifetime .label {
+                color: var(--text-dim);
+            }
+
+            /* SECTION HEADER */
+            .section-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid var(--border);
+            }
+            .section-title {
+                font-family: "Fraunces", serif;
+                font-size: 18px;
+                font-weight: 300;
+                color: var(--text);
+            }
+            .section-desc {
+                font-size: 11px;
+                color: var(--text-dim);
+                margin-left: auto;
+                letter-spacing: 0.03em;
+            }
+
+            /* LEGEND */
+            .legend {
+                display: flex;
+                gap: 24px;
+                margin: 16px 0 32px;
+                flex-wrap: wrap;
+            }
+            .legend-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 11px;
+                color: var(--text-dim);
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+            .legend-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            /* SWATCH */
+            .swatch {
+                display: inline-block;
+                width: 28px;
+                height: 16px;
+                border-radius: 3px;
+                vertical-align: middle;
+            }
+
+            /* PROGRESS BAR */
+            .progress-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin: 8px 0;
+            }
+            .progress-label {
+                width: 100px;
+                font-size: 12px;
+                color: var(--text);
+            }
+            .progress-track {
+                flex: 1;
+                height: 6px;
+                background: var(--surface);
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .progress-fill {
+                height: 100%;
+                border-radius: 3px;
+                transition: width 0.3s;
+            }
+            .progress-pct {
+                width: 40px;
+                font-size: 11px;
+                color: var(--text-dim);
+                text-align: right;
+            }
+
+            /* CHECKLIST */
+            .checklist {
+                list-style: none;
+                margin-left: 0;
+            }
+            .checklist li {
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+                margin: 4px 0;
+            }
+            .check {
+                color: var(--component-tag);
+                flex-shrink: 0;
+            }
+            .uncheck {
+                color: var(--text-dimmer);
+                flex-shrink: 0;
+            }
+
+            /* NOTE */
+            .note {
+                background: var(--surface);
+                border-left: 3px solid var(--accent-dim);
+                padding: 12px 16px;
+                border-radius: 0 var(--radius) var(--radius) 0;
+                margin: 16px 0;
+                font-size: 12px;
+                color: var(--text-dim);
+            }
+
+            /* DIVIDER */
+            hr {
+                border: none;
+                border-top: 1px solid var(--border);
+                margin: 40px 0;
+            }
+
+            /* SYNTAX */
+            .kw {
+                color: #c86e9e;
+            }
+            .type {
+                color: #6e9ec8;
+            }
+            .macro {
+                color: #c8a96e;
+            }
+            .str {
+                color: #6ec88a;
+            }
+            .num {
+                color: #c8956e;
+            }
+            .cmt {
+                color: #3d3830;
+                font-style: italic;
+            }
+            .fn {
+                color: #a09070;
+            }
+            .prop {
+                color: #c8c0a8;
+            }
+
+            @media (max-width: 700px) {
+                .split {
+                    grid-template-columns: 1fr;
+                }
+                .section-desc {
+                    display: none;
+                }
+                nav {
+                    padding: 0 12px;
+                }
+                .wrapper {
+                    padding: 32px 16px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <div class="nav-brand">Allegro<span>/handbook</span></div>
+            <button class="nav-tab active" data-tab="home">Home</button>
+            <button class="nav-tab" data-tab="design">Design</button>
+            <button class="nav-tab" data-tab="ecosystem">Ecosystem</button>
+            <button class="nav-tab" data-tab="score">Score</button>
+            <button class="nav-tab" data-tab="stage">Stage</button>
+            <button class="nav-tab" data-tab="composer">Composer</button>
+        </nav>
+
+        <div class="wrapper">
+            <!-- ——— Home ——— -->
+            <section id="home" class="active">
+                <h1>Allegro Handbook</h1>
+                <p class="subtitle">
+                    doctrine · product requirements · delivery tracking
+                </p>
+
+                <p>
+                    The handbook defines the Allegro ecosystem at three levels:
+                    what the system is trying to preserve (doctrine), what each
+                    product owns (requirements), and what is built today versus
+                    still planned (delivery).
+                </p>
+
+                <h2>Current Defaults</h2>
+                <ul>
+                    <li>Static-first output remains the default model.</li>
+                    <li>
+                        Runtime exists to support capabilities, not as a default
+                        mode.
+                    </li>
+                    <li>
+                        Score is the active build phase; Stage and Libretto
+                        remain downstream work.
+                    </li>
+                    <li>
+                        Score is at <strong>85%</strong> with all modules
+                        implemented and covered; CLI tooling and examples
+                        pending.
+                    </li>
+                </ul>
+
+                <h2>Build Progress</h2>
+                <p class="dim">
+                    Score → Stage → Libretto → Allegro Site → Composer
+                </p>
+
+                <div style="margin: 24px 0">
+                    <div class="progress-row">
+                        <span class="progress-label">Score</span>
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill"
+                                style="
+                                    width: 85%;
+                                    background: var(--component-tag);
+                                "
+                            ></div>
+                        </div>
+                        <span class="progress-pct">85%</span>
+                    </div>
+                    <div class="progress-row">
+                        <span class="progress-label">Stage</span>
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill"
+                                style="width: 5%; background: var(--text-dim)"
+                            ></div>
+                        </div>
+                        <span class="progress-pct">5%</span>
+                    </div>
+                    <div class="progress-row">
+                        <span class="progress-label">Libretto</span>
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill"
+                                style="width: 2%; background: var(--text-dim)"
+                            ></div>
+                        </div>
+                        <span class="progress-pct">2%</span>
+                    </div>
+                    <div class="progress-row">
+                        <span class="progress-label">Allegro Site</span>
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill"
+                                style="width: 1%; background: var(--text-dim)"
+                            ></div>
+                        </div>
+                        <span class="progress-pct">1%</span>
+                    </div>
+                    <div class="progress-row">
+                        <span class="progress-label">Composer</span>
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill"
+                                style="width: 7%; background: var(--text-dim)"
+                            ></div>
+                        </div>
+                        <span class="progress-pct">7%</span>
+                    </div>
+                </div>
+
+                <h3>Score</h3>
+                <p class="dim">
+                    Swift web framework — <strong>In Progress</strong>
+                </p>
+                <ul class="checklist">
+                    <li>
+                        <span class="check">✓</span> ScoreCore — node protocol,
+                        result builder, application/theme/metadata/routing
+                        contracts
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreHTML — HTML renderer
+                        with broad node coverage
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreCSS — modifier
+                        emission, stylesheet rule deduplication
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreRouter — route table
+                        compilation, path matching, 404/405 handling
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreRuntime — HTTP server,
+                        page renderer, reactive model, JS emitter
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreStorage — unified
+                        transactional KV store, FoundationDB-compatible protocol
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreAuth — Magic Link,
+                        Passkey, sessions, CSRF
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreContent —
+                        Markdown-to-Node, syntax themes, MathML, front matter
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreAssets — SHA256
+                        fingerprinting, asset manifest, gzip optimization
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreUI — 30
+                        shadcn-equivalent components
+                    </li>
+                    <li>
+                        <span class="check">✓</span> ScoreVendor — Analytics
+                        providers, VendorIntegration protocol
+                    </li>
+                    <li>
+                        <span class="uncheck">○</span> CLI tooling (score init,
+                        dev, build, deploy)
+                    </li>
+                    <li>
+                        <span class="uncheck">○</span> Full-stack web parity
+                    </li>
+                    <li>
+                        <span class="uncheck">○</span> Canonical example
+                        applications
+                    </li>
+                    <li><span class="uncheck">○</span> v1.0.0 release</li>
+                </ul>
+
+                <h3>Documents</h3>
+                <ul>
+                    <li>
+                        <a href="#design" onclick="switchTab('design')"
+                            >Design Philosophy</a
+                        >
+                        — product standards and style guide
+                    </li>
+                    <li>
+                        <a href="#ecosystem" onclick="switchTab('ecosystem')"
+                            >Ecosystem PRD</a
+                        >
+                        — systems thesis, boundaries, dependencies, progress
+                    </li>
+                    <li>
+                        <a href="#score" onclick="switchTab('score')"
+                            >Score PRD</a
+                        >
+                        — framework, runtime model, CLI, build artifacts
+                    </li>
+                    <li>
+                        <a href="#stage" onclick="switchTab('stage')"
+                            >Stage PRD</a
+                        >
+                        — hosting product
+                    </li>
+                    <li>
+                        <a href="#composer" onclick="switchTab('composer')"
+                            >Composer PRD</a
+                        >
+                        — native visual editor
+                    </li>
+                </ul>
+            </section>
+
+            <!-- ——— Design ——— -->
+            <section id="design">
+                <h1>Design Philosophy</h1>
+                <p class="subtitle">principles + style guide</p>
+
+                <h2>Product Standards</h2>
+                <ul>
+                    <li>
+                        Interfaces should feel immediate. Most interactions
+                        should acknowledge input within a fraction of a second.
+                    </li>
+                    <li>Navigation should stay shallow and legible.</li>
+                    <li>Copy should be direct, active, and short.</li>
+                    <li>
+                        Motion should clarify state changes, not decorate them.
+                    </li>
+                    <li>Hit targets must stay comfortable on touch devices.</li>
+                    <li>
+                        Empty, loading, and error states should look
+                        intentional.
+                    </li>
+                    <li>
+                        Visual hierarchy should come from spacing, typography,
+                        and contrast before ornament.
+                    </li>
+                    <li>Accessibility is a baseline quality requirement.</li>
+                </ul>
+
+                <h2>What We Avoid</h2>
+                <ul>
+                    <li>Autoplay and attention traps</li>
+                    <li>First-load modal interruptions</li>
+                    <li>Excessive tooltip dependency</li>
+                    <li>Deeply nested navigation for simple products</li>
+                    <li>
+                        Full-page loading spinners as the default answer to
+                        latency
+                    </li>
+                    <li>Decorative motion that obscures information</li>
+                </ul>
+
+                <hr />
+
+                <h2>Typography</h2>
+
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Role</th>
+                            <th>Family</th>
+                            <th>Weight</th>
+                            <th>Notes</th>
+                        </tr>
+                        <tr>
+                            <td>Body / Code</td>
+                            <td
+                                style="
+                                    font-family: &quot;DM Mono&quot;, monospace;
+                                "
+                            >
+                                DM Mono
+                            </td>
+                            <td>300, 400, 500, 300i</td>
+                            <td>Monospace. Primary text and code blocks.</td>
+                        </tr>
+                        <tr>
+                            <td>Display / Headings</td>
+                            <td
+                                style="
+                                    font-family: &quot;Fraunces&quot;, serif;
+                                    font-size: 14px;
+                                "
+                            >
+                                Fraunces
+                            </td>
+                            <td>300, 600, 300i</td>
+                            <td>
+                                Serif. Optical size 9–144. Headings and titles.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2>Color Tokens</h2>
+
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th style="width: 50px"></th>
+                            <th>Token</th>
+                            <th>Hex</th>
+                            <th>Usage</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="
+                                        background: #0f0e0c;
+                                        border: 1px solid var(--border);
+                                    "
+                                ></span>
+                            </td>
+                            <td><code>--bg</code></td>
+                            <td>#0f0e0c</td>
+                            <td>Page background</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="
+                                        background: #1a1814;
+                                        border: 1px solid var(--border);
+                                    "
+                                ></span>
+                            </td>
+                            <td><code>--surface</code></td>
+                            <td>#1a1814</td>
+                            <td>Cards, pane headers, input backgrounds</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="
+                                        background: #242018;
+                                        border: 1px solid var(--border);
+                                    "
+                                ></span>
+                            </td>
+                            <td><code>--surface2</code></td>
+                            <td>#242018</td>
+                            <td>Elevated surfaces, demo bodies</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="
+                                        background: #2e2a22;
+                                        border: 1px solid var(--text-dimmer);
+                                    "
+                                ></span>
+                            </td>
+                            <td><code>--border</code></td>
+                            <td>#2e2a22</td>
+                            <td>Borders, dividers</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #e8e0d0"
+                                ></span>
+                            </td>
+                            <td><code>--text</code></td>
+                            <td>#e8e0d0</td>
+                            <td>Primary text</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #7a7060"
+                                ></span>
+                            </td>
+                            <td><code>--text-dim</code></td>
+                            <td>#7a7060</td>
+                            <td>Secondary text, labels</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #3d3830"
+                                ></span>
+                            </td>
+                            <td><code>--text-dimmer</code></td>
+                            <td>#3d3830</td>
+                            <td>Tertiary text, comments</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #c8a96e"
+                                ></span>
+                            </td>
+                            <td><code>--accent</code></td>
+                            <td>#c8a96e</td>
+                            <td>Gold accent, active elements</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #7a6540"
+                                ></span>
+                            </td>
+                            <td><code>--accent-dim</code></td>
+                            <td>#7a6540</td>
+                            <td>Muted accent, toggle tracks</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #6e9ec8"
+                                ></span>
+                            </td>
+                            <td style="color: var(--global-tag)">
+                                <code>--global-tag</code>
+                            </td>
+                            <td style="color: var(--global-tag)">#6e9ec8</td>
+                            <td>Blue — application scope</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #c86e9e"
+                                ></span>
+                            </td>
+                            <td style="color: var(--page-tag)">
+                                <code>--page-tag</code>
+                            </td>
+                            <td style="color: var(--page-tag)">#c86e9e</td>
+                            <td>Pink — page scope</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="background: #6ec88a"
+                                ></span>
+                            </td>
+                            <td style="color: var(--component-tag)">
+                                <code>--component-tag</code>
+                            </td>
+                            <td style="color: var(--component-tag)">#6ec88a</td>
+                            <td>Green — element scope</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span
+                                    class="swatch"
+                                    style="
+                                        background: #13120f;
+                                        border: 1px solid var(--border);
+                                    "
+                                ></span>
+                            </td>
+                            <td><code>--code-bg</code></td>
+                            <td>#13120f</td>
+                            <td>Code block backgrounds</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2>Syntax Highlighting</h2>
+
+                <pre><code><span class="kw">struct</span> <span class="type">ShopPage</span>: <span class="type">Page</span> {
+    <span class="macro">@State</span> <span class="kw">var</span> <span class="prop">activeFilter</span>: <span class="type">String</span> = <span class="str">"all"</span>
+    <span class="kw">let</span> <span class="prop">maxResults</span>: <span class="type">Int</span> = <span class="num">25</span>
+
+    <span class="cmt">// filter products by category</span>
+    <span class="macro">@Action</span>
+    <span class="kw">func</span> <span class="fn">setFilter</span>(<span class="prop">_</span> f: <span class="type">String</span>) {
+        activeFilter = f
+    }
+}</code></pre>
+
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Role</th>
+                            <th>Preview</th>
+                            <th>Hex</th>
+                            <th>Class</th>
+                        </tr>
+                        <tr>
+                            <td>Keyword</td>
+                            <td style="color: #c86e9e">
+                                struct var func let guard return
+                            </td>
+                            <td>#c86e9e</td>
+                            <td style="color: var(--text-dimmer)">.kw</td>
+                        </tr>
+                        <tr>
+                            <td>Type / Tag</td>
+                            <td style="color: #6e9ec8">
+                                String Int Page Bool Application
+                            </td>
+                            <td>#6e9ec8</td>
+                            <td style="color: var(--text-dimmer)">.type</td>
+                        </tr>
+                        <tr>
+                            <td>Macro / Decorator</td>
+                            <td style="color: #c8a96e">
+                                @State @Computed @Action @main
+                            </td>
+                            <td>#c8a96e</td>
+                            <td style="color: var(--text-dimmer)">.macro</td>
+                        </tr>
+                        <tr>
+                            <td>String / Value</td>
+                            <td style="color: #6ec88a">
+                                "all" "signal-polyfill" "shop"
+                            </td>
+                            <td>#6ec88a</td>
+                            <td style="color: var(--text-dimmer)">.str</td>
+                        </tr>
+                        <tr>
+                            <td>Number</td>
+                            <td style="color: #c8956e">0 10 25 52</td>
+                            <td>#c8956e</td>
+                            <td style="color: var(--text-dimmer)">.num</td>
+                        </tr>
+                        <tr>
+                            <td>Comment</td>
+                            <td style="color: #3d3830; font-style: italic">
+                                // filter products by category
+                            </td>
+                            <td>#3d3830</td>
+                            <td style="color: var(--text-dimmer)">.cmt</td>
+                        </tr>
+                        <tr>
+                            <td>Function call</td>
+                            <td style="color: #a09070">
+                                setFilter toggleTheme signIn
+                            </td>
+                            <td>#a09070</td>
+                            <td style="color: var(--text-dimmer)">.fn</td>
+                        </tr>
+                        <tr>
+                            <td>Property</td>
+                            <td style="color: #c8c0a8">
+                                activeFilter isDarkMode count
+                            </td>
+                            <td>#c8c0a8</td>
+                            <td style="color: var(--text-dimmer)">.prop</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2>Scope Color Language</h2>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div
+                            class="legend-dot"
+                            style="background: var(--global-tag)"
+                        ></div>
+                        Application state
+                    </div>
+                    <div class="legend-item">
+                        <div
+                            class="legend-dot"
+                            style="background: var(--page-tag)"
+                        ></div>
+                        Page state
+                    </div>
+                    <div class="legend-item">
+                        <div
+                            class="legend-dot"
+                            style="background: var(--component-tag)"
+                        ></div>
+                        Element state
+                    </div>
+                </div>
+
+                <p class="dim">
+                    These colors appear in scope tags, legend dots, demo
+                    indicators, and signal graph readouts throughout
+                    documentation and tooling.
+                </p>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════════════
+     ECOSYSTEM
+═══════════════════════════════════════════════════════════════ -->
+            <section id="ecosystem">
+                <h1>Ecosystem PRD</h1>
+                <p class="subtitle">
+                    systems thesis · boundaries · dependencies · progress
+                </p>
+
+                <h2>Overview</h2>
+                <p>
+                    Allegro is a Swift-first web ecosystem made of five
+                    products:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Score</strong> — the framework and
+                        rendering/runtime foundation
+                    </li>
+                    <li>
+                        <strong>Stage</strong> — the hosting and operations
+                        product
+                    </li>
+                    <li>
+                        <strong>Libretto</strong> — the first-party reference
+                        application
+                    </li>
+                    <li>
+                        <strong>Allegro Site</strong> — the canonical public
+                        site and documentation surface
+                    </li>
+                    <li>
+                        <strong>Composer</strong> — native macOS and iPad visual
+                        editor
+                    </li>
+                </ul>
+
+                <h2>Systems Thesis</h2>
+                <p>
+                    Most pages should be static. Runtime should appear only when
+                    the problem requires it. Performance and durability are
+                    product qualities, not optional polish.
+                </p>
+                <ul>
+                    <li>
+                        <strong>Static is the base state.</strong> Dynamic
+                        behaviour must justify its cost.
+                    </li>
+                    <li>
+                        <strong>Runtime is a capability.</strong> Not a mode
+                        switch to micromanage.
+                    </li>
+                    <li>
+                        <strong>Progressive enhancement is required.</strong>
+                        HTML → CSS → JS/server.
+                    </li>
+                    <li>
+                        <strong>Performance is correctness.</strong> Slow output
+                        is an architecture failure.
+                    </li>
+                    <li>
+                        <strong>Durability matters when state matters.</strong>
+                        Retries, timeouts, idempotency.
+                    </li>
+                    <li>
+                        <strong>Boundaries stay hard.</strong> Score builds.
+                        Stage hosts. Libretto proves.
+                    </li>
+                    <li>
+                        <strong>Dependencies are architecture.</strong> Curated,
+                        not procured.
+                    </li>
+                    <li>
+                        <strong>Narrow focus is intentional.</strong> One
+                        coherent path for typed, static-first web.
+                    </li>
+                </ul>
+
+                <h2>Delivery Order</h2>
+                <ol>
+                    <li>
+                        Score becomes viable enough to build and ship real
+                        applications.
+                    </li>
+                    <li>
+                        Stage becomes viable enough to host those applications
+                        well.
+                    </li>
+                    <li>
+                        Libretto uses both in production and exposes the rough
+                        edges.
+                    </li>
+                    <li>Allegro Site publishes ecosystem documentation.</li>
+                    <li>
+                        Composer provides visual editing on top of the canonical
+                        CLI toolchain.
+                    </li>
+                </ol>
+
+                <h2>Dependency Policy</h2>
+                <h4>Approved Swift Sources</h4>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Source</th>
+                            <th>Collection</th>
+                        </tr>
+                        <tr>
+                            <td>Apple</td>
+                            <td>swiftpackageindex.com/apple/collection.json</td>
+                        </tr>
+                        <tr>
+                            <td>Swift.org</td>
+                            <td>
+                                swiftpackageindex.com/swiftlang/collection.json
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SSWG</td>
+                            <td>
+                                swiftpackageindex.com/swift-server/collection.json
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Swift Server Community</td>
+                            <td>
+                                swiftpackageindex.com/swift-server-community/collection.json
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h4>Approved JavaScript Dependencies</h4>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Dependency</th>
+                            <th>Purpose</th>
+                            <th>Scope</th>
+                        </tr>
+                        <tr>
+                            <td><code>signal-polyfill</code></td>
+                            <td>
+                                TC39 Signals polyfill for browser reactivity
+                            </td>
+                            <td>Client-side runtime</td>
+                        </tr>
+                        <tr>
+                            <td><code>@js-temporal/polyfill</code></td>
+                            <td>Temporal API polyfill</td>
+                            <td>Client-side runtime</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2>Libretto</h2>
+                <p>
+                    Libretto is the first-party reference application. A focused
+                    writing and publishing workspace that validates Score and
+                    Stage under real product pressure.
+                </p>
+                <p>
+                    <strong>Target:</strong> Independent writers and small
+                    creative teams. <strong>Brand:</strong>
+                    <em>Libretto</em> wordmark with small cursive
+                    <em>by Allegro</em> in the bottom-right lockup.
+                </p>
+                <p>
+                    <strong>Phases:</strong> Foundation (auth + editor +
+                    publishing) → Depth (collections, assets, theming) →
+                    Collaboration (teams, comments, analytics, API).
+                </p>
+
+                <h2>Allegro Site</h2>
+                <p>
+                    The canonical public site unifying handbook doctrine,
+                    product boundaries, and implementation documentation. Each
+                    documentation section's first page should be a marketing
+                    page showing features, benefits, and quick examples.
+                </p>
+
+                <h2>Architecture Decision Records</h2>
+
+                <h4>ADR-001 · FoundationDB KV Store</h4>
+                <p class="dim">
+                    Single transactional KV abstraction. Minimal API: get, set,
+                    delete, scan, transactions. No SQL in core.
+                </p>
+
+                <h4>ADR-002 · TC39 Signals Polyfill</h4>
+                <p class="dim">
+                    Browser runtime targets signal-polyfill. @State →
+                    Signal.State, @Computed → Signal.Computed. Three scopes:
+                    Application, Page, Element.
+                </p>
+
+                <h4>ADR-003 · Single-Worker Composer</h4>
+                <p class="dim">
+                    One sandboxed worker at a time. Inactive projects compressed
+                    and evicted.
+                </p>
+
+                <h4>ADR-004 · Swift 6 Strict Concurrency</h4>
+                <p class="dim">
+                    All Node types must be Sendable. Structured concurrency
+                    throughout.
+                </p>
+
+                <h4>ADR-005 · Static-First Default</h4>
+                <p class="dim">
+                    Static output is default. Runtime capabilities opt-in.
+                    Capability manifest enforces at build/deploy.
+                </p>
+
+                <h4>ADR-006 · Deterministic Builds</h4>
+                <p class="dim">Identical inputs → byte-equivalent outputs.</p>
+
+                <h4>ADR-007 · Three-Level Signal State</h4>
+                <p class="dim">
+                    Application (global singletons), Page (module-scoped, torn
+                    down on nav), Element (instance-scoped, per mount).
+                </p>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════════════
+     SCORE
+═══════════════════════════════════════════════════════════════ -->
+            <section id="score">
+                <h1>Score PRD</h1>
+                <p class="subtitle">
+                    Swift web framework · compile-time simplicity · runtime
+                    completeness
+                </p>
+
+                <h2>Package</h2>
+                <p>
+                    12 modules, all with substantive implementations and test coverage.
+                    <strong>85%</strong> overall — CLI tooling and canonical examples remaining.
+                </p>
+                <p class="dim">
+                    ScoreCore, ScoreHTML, ScoreCSS, ScoreRouter, ScoreRuntime (HTTP, reactive, JS emitter),
+                    ScoreStorage (transactional KV), ScoreAuth (magic link, passkey, CSRF),
+                    ScoreContent (markdown, MathML), ScoreAssets (fingerprinting, gzip),
+                    ScoreUI (30 components), ScoreVendor (analytics, third-party).
+                </p>
+
+                <h2>Project Structure</h2>
+                <pre><code>Sources/
+  App.swift
+  Controllers/
+  Pages/
+  Middleware/
+  Components/
+  Models/
+  Utilities/
+  Vendors/
+Package.swift
+Resources/
+  Localizable.xcstrings
+  Assets/</code></pre>
+
+                <h2>Application Model</h2>
+                <pre><code><span class="macro">@main</span>
+<span class="kw">struct</span> <span class="type">App</span>: <span class="type">Application</span> {
+    <span class="kw">var</span> <span class="prop">pages</span>: [<span class="kw">any</span> <span class="type">Page</span>] { [<span class="type">HomePage</span>()] }
+    <span class="kw">var</span> <span class="prop">controllers</span>: [<span class="kw">any</span> <span class="type">Controller</span>] { [] }
+    <span class="kw">var</span> <span class="prop">theme</span>: (<span class="kw">any</span> <span class="type">Theme</span>)? { <span class="kw">nil</span> }
+    <span class="kw">var</span> <span class="prop">metadata</span>: (<span class="kw">any</span> <span class="type">Metadata</span>)? { <span class="kw">nil</span> }
+}</code></pre>
+
+                <h2>Theme</h2>
+                <ul>
+                    <li>Optional — Score ships a complete default theme. <code>Application.theme</code> is the declaration site</li>
+                    <li><code>ThemePatch</code> for dark and named variants (<code>.dark { ... }</code>, <code>.theme("ocean") { ... }</code>). Syntax highlighting is part of the theme</li>
+                    <li>Semantic roles (<code>surface</code>, <code>text</code>, <code>border</code>, <code>accent</code>), type/spacing/radius scales, font families. Custom roles compile to typed Swift accessors</li>
+                    <li>Named theme persists via <code>as_theme</code> cookie — SSR and static agree without flash. Non-JS switching via <code>/_score/theme</code></li>
+                </ul>
+
+                <h2>Signal State Model</h2>
+                <p>
+                    Score's browser runtime is compiler-driven and
+                    signal-backed. The compiler lowers Swift state declarations
+                    to JavaScript using the TC39 Signals polyfill (<code
+                        >signal-polyfill</code
+                    >
+                    npm package).
+                </p>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div
+                            class="legend-dot"
+                            style="background: var(--global-tag)"
+                        ></div>
+                        Application state
+                    </div>
+                    <div class="legend-item">
+                        <div
+                            class="legend-dot"
+                            style="background: var(--page-tag)"
+                        ></div>
+                        Page state
+                    </div>
+                    <div class="legend-item">
+                        <div
+                            class="legend-dot"
+                            style="background: var(--component-tag)"
+                        ></div>
+                        Element state
+                    </div>
+                </div>
+
+                <!-- APPLICATION STATE -->
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-global">Application</span>
+                        <span class="section-title"
+                            >Theme &amp; User Session</span
+                        >
+                        <span class="section-desc"
+                            >App.swift → runtime/app.js</span
+                        >
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">App.swift</span>
+                            </div>
+                            <pre><code><span class="cmt">// Application conformance — singleton</span>
+<span class="cmt">// shared across all pages and elements</span>
+
+<span class="macro">@main</span>
+<span class="kw">struct</span> <span class="type">MyApp</span>: <span class="type">Application</span> {
+    <span class="macro">@State</span> <span class="kw">var</span> <span class="prop">isDarkMode</span>: <span class="type">Bool</span> = <span class="kw">true</span>
+    <span class="macro">@State</span> <span class="kw">var</span> <span class="prop">currentUser</span>: <span class="type">User?</span> = <span class="kw">nil</span>
+
+    <span class="macro">@Action</span>
+    <span class="kw">func</span> <span class="fn">toggleTheme</span>() {
+        isDarkMode.toggle()
+    }
+
+    <span class="macro">@Action</span>
+    <span class="kw">func</span> <span class="fn">signIn</span>(<span class="prop">name</span>: <span class="type">String</span>) {
+        currentUser = <span class="type">User</span>(<span class="prop">name</span>: name)
+    }
+}</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang">app.js</span>
+                            </div>
+                            <pre><code><span class="cmt">// Score runtime — app.js</span>
+<span class="cmt">// Auto-generated. Do not edit.</span>
+<span class="kw">import</span> { <span class="type">Signal</span> } <span class="kw">from</span> <span class="str">"signal-polyfill"</span>;
+
+<span class="cmt">// Application: @State — module singleton</span>
+<span class="kw">export const</span> <span class="prop">isDarkMode</span> =
+  <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">State</span>(<span class="kw">true</span>);
+
+<span class="kw">export const</span> <span class="prop">currentUser</span> =
+  <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">State</span>(<span class="kw">null</span>);
+
+<span class="cmt">// @Action — plain setters</span>
+<span class="kw">export function</span> <span class="macro">toggleTheme</span>() {
+  isDarkMode.<span class="macro">set</span>(!isDarkMode.<span class="macro">get</span>());
+}
+
+<span class="kw">export function</span> <span class="macro">signIn</span>(name) {
+  currentUser.<span class="macro">set</span>({ name });
+}</code></pre>
+                        </div>
+                    </div>
+                    <div class="scope-lifetime">
+                        <div
+                            class="scope-dot"
+                            style="background: var(--global-tag)"
+                        ></div>
+                        <span class="label">Lifetime:</span> Entire application
+                        session. Never torn down during navigation.
+                    </div>
+                </div>
+
+                <!-- PAGE STATE -->
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-page">Page</span>
+                        <span class="section-title">Product Filter</span>
+                        <span class="section-desc"
+                            >Shop.swift → pages/shop.js</span
+                        >
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang">Shop.swift</span>
+                            </div>
+                            <pre><code><span class="cmt">// Page conformance — scoped to this</span>
+<span class="cmt">// page's lifetime, torn down on navigation</span>
+
+<span class="kw">struct</span> <span class="type">ShopPage</span>: <span class="type">Page</span> {
+    <span class="macro">@State</span> <span class="kw">var</span> <span class="prop">activeFilter</span>: <span class="type">String</span> = <span class="str">"all"</span>
+
+    <span class="macro">@Computed</span>
+    <span class="kw">var</span> <span class="prop">visibleProducts</span>: [<span class="type">Product</span>] {
+        <span class="kw">guard</span> activeFilter != <span class="str">"all"</span>
+        <span class="kw">else</span> { <span class="kw">return</span> products }
+        <span class="kw">return</span> products.<span class="fn">filter</span> {
+            $0.category == activeFilter
+        }
+    }
+
+    <span class="macro">@Action</span>
+    <span class="kw">func</span> <span class="fn">setFilter</span>(<span class="prop">_</span> f: <span class="type">String</span>) {
+        activeFilter = f
+    }
+}</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang">shop.js</span>
+                            </div>
+                            <pre><code><span class="cmt">// Score runtime — shop.js</span>
+<span class="cmt">// Auto-generated. Do not edit.</span>
+<span class="kw">import</span> { <span class="type">Signal</span> } <span class="kw">from</span> <span class="str">"signal-polyfill"</span>;
+
+<span class="cmt">// Page: @State — module-scoped, not exported</span>
+<span class="kw">const</span> <span class="prop">activeFilter</span> =
+  <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">State</span>(<span class="str">"all"</span>);
+
+<span class="cmt">// @Computed — derived, memoised</span>
+<span class="kw">const</span> <span class="prop">visibleProducts</span> =
+  <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">Computed</span>(() => {
+    <span class="kw">const</span> f = activeFilter.<span class="macro">get</span>();
+    <span class="kw">if</span> (f === <span class="str">"all"</span>) <span class="kw">return</span> products;
+    <span class="kw">return</span> products.<span class="macro">filter</span>(
+      p => p.category === f
+    );
+  });
+
+<span class="cmt">// @Action</span>
+<span class="kw">export function</span> <span class="macro">setFilter</span>(f) {
+  activeFilter.<span class="macro">set</span>(f);
+}</code></pre>
+                        </div>
+                    </div>
+                    <div class="scope-lifetime">
+                        <div
+                            class="scope-dot"
+                            style="background: var(--page-tag)"
+                        ></div>
+                        <span class="label">Lifetime:</span> Page mount to
+                        unmount. Torn down on navigation.
+                    </div>
+                </div>
+
+                <!-- ELEMENT STATE -->
+                <div style="margin: 40px 0">
+                    <div class="section-header">
+                        <span class="tag tag-component">Element</span>
+                        <span class="section-title">Quantity Picker</span>
+                        <span class="section-desc"
+                            >QuantityPicker.swift →
+                            elements/quantity-picker.js</span
+                        >
+                    </div>
+
+                    <div class="split">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Score · Swift</span>
+                                <span class="pane-lang"
+                                    >QuantityPicker.swift</span
+                                >
+                            </div>
+                            <pre><code><span class="cmt">// Element conformance — each instance</span>
+<span class="cmt">// gets its own isolated signal graph</span>
+
+<span class="kw">struct</span> <span class="type">QuantityPicker</span>: <span class="type">Element</span> {
+    <span class="kw">let</span> <span class="prop">product</span>: <span class="type">Product</span>
+    <span class="kw">let</span> <span class="prop">max</span>: <span class="type">Int</span> = <span class="num">10</span>
+
+    <span class="macro">@State</span> <span class="kw">var</span> <span class="prop">count</span>: <span class="type">Int</span> = <span class="num">0</span>
+
+    <span class="macro">@Computed</span>
+    <span class="kw">var</span> <span class="prop">canIncrement</span>: <span class="type">Bool</span> {
+        count &lt; max
+    }
+
+    <span class="macro">@Action</span>
+    <span class="kw">func</span> <span class="fn">increment</span>() {
+        <span class="kw">guard</span> canIncrement <span class="kw">else</span> { <span class="kw">return</span> }
+        count += <span class="num">1</span>
+    }
+
+    <span class="macro">@Action</span>
+    <span class="kw">func</span> <span class="fn">decrement</span>() {
+        <span class="kw">guard</span> count > <span class="num">0</span> <span class="kw">else</span> { <span class="kw">return</span> }
+        count -= <span class="num">1</span>
+    }
+}</code></pre>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span class="pane-label">Compiled Output</span>
+                                <span class="pane-lang"
+                                    >quantity-picker.js</span
+                                >
+                            </div>
+                            <pre><code><span class="cmt">// Score runtime — quantity-picker.js</span>
+<span class="cmt">// Auto-generated. Do not edit.</span>
+<span class="kw">import</span> { <span class="type">Signal</span> } <span class="kw">from</span> <span class="str">"signal-polyfill"</span>;
+
+<span class="cmt">// Element: factory — called per mount</span>
+<span class="kw">export function</span> <span class="macro">mountQuantityPicker</span>(
+  el, { product, max = <span class="num">10</span> }
+) {
+  <span class="cmt">// Element: @State — instance-scoped</span>
+  <span class="kw">const</span> <span class="prop">count</span> =
+    <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">State</span>(<span class="num">0</span>);
+
+  <span class="cmt">// @Computed</span>
+  <span class="kw">const</span> <span class="prop">canIncrement</span> =
+    <span class="kw">new</span> <span class="type">Signal</span>.<span class="type">Computed</span>(
+      () => count.<span class="macro">get</span>() &lt; max
+    );
+
+  <span class="cmt">// @Action</span>
+  <span class="kw">const</span> <span class="macro">increment</span> = () => {
+    <span class="kw">if</span> (canIncrement.<span class="macro">get</span>())
+      count.<span class="macro">set</span>(count.<span class="macro">get</span>() + <span class="num">1</span>);
+  };
+  <span class="kw">const</span> <span class="macro">decrement</span> = () => {
+    <span class="kw">if</span> (count.<span class="macro">get</span>() > <span class="num">0</span>)
+      count.<span class="macro">set</span>(count.<span class="macro">get</span>() - <span class="num">1</span>);
+  };
+
+  <span class="cmt">// Wire DOM + return teardown</span>
+  <span class="kw">return</span> { count, canIncrement,
+           increment, decrement };
+}</code></pre>
+                        </div>
+                    </div>
+                    <div class="scope-lifetime">
+                        <div
+                            class="scope-dot"
+                            style="background: var(--component-tag)"
+                        ></div>
+                        <span class="label">Lifetime:</span> Element mount to
+                        unmount. Each instance is fully isolated.
+                    </div>
+                </div>
+
+                <h3>Lowering Summary</h3>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Swift construct</th>
+                            <th>JS output</th>
+                            <th>Scope</th>
+                        </tr>
+                        <tr>
+                            <td><code>@State</code> on Application</td>
+                            <td>
+                                <code
+                                    >export const x = new Signal.State(v)</code
+                                >
+                                in app.js
+                            </td>
+                            <td>Module singleton (global)</td>
+                        </tr>
+                        <tr>
+                            <td><code>@State</code> on Page</td>
+                            <td>
+                                <code>const x = new Signal.State(v)</code> in
+                                page module
+                            </td>
+                            <td>Module-scoped (page lifetime)</td>
+                        </tr>
+                        <tr>
+                            <td><code>@State</code> on Element</td>
+                            <td>
+                                <code>const x = new Signal.State(v)</code>
+                                inside factory
+                            </td>
+                            <td>Instance-scoped (per mount)</td>
+                        </tr>
+                        <tr>
+                            <td><code>@Computed</code></td>
+                            <td><code>new Signal.Computed(() => ...)</code></td>
+                            <td>Same scope as containing type</td>
+                        </tr>
+                        <tr>
+                            <td><code>@Action</code></td>
+                            <td>
+                                Plain function performing
+                                <code>.set()</code> calls
+                            </td>
+                            <td>Same scope as containing type</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2>Reactive Invariants</h2>
+                <ul>
+                    <li>
+                        <strong>Fine-grained dependency tracking.</strong>
+                        Dynamic dependency graph based on actual reads.
+                    </li>
+                    <li>
+                        <strong>Batched updates.</strong> Multiple writes in
+                        same microtask coalesce. No cascading DOM mutations.
+                    </li>
+                    <li>
+                        <strong>Deterministic effect ordering.</strong> Parent
+                        before children, earlier before later.
+                    </li>
+                    <li>
+                        <strong>Glitch-free derived state.</strong> Computed
+                        values never see partial updates.
+                    </li>
+                    <li>
+                        <strong>Disposal semantics.</strong> Removed subtrees
+                        dispose all bindings. No subscription leaks.
+                    </li>
+                    <li>
+                        <strong>Scope isolation.</strong> Application is global,
+                        Page is module-scoped, Element is instance-scoped.
+                    </li>
+                </ul>
+
+                <h2>CLI Contract</h2>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Command</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td><code>score init</code></td>
+                            <td>
+                                Generate canonical project from built-in
+                                template
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>score dev</code></td>
+                            <td>
+                                Watch, recompile, local preview with hot reload
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>score build</code></td>
+                            <td>
+                                Full compile → deterministic output in
+                                <code>.build/score/</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>score serve</code></td>
+                            <td>
+                                Run the built app in production mode locally —
+                                use when Stage is not available
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>score deploy</code></td>
+                            <td>
+                                Package and submit to Stage for remote build
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h4>Exit Codes</h4>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Code</th>
+                            <th>Meaning</th>
+                        </tr>
+                        <tr>
+                            <td>0</td>
+                            <td>Success</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Compile, build, or deploy failure</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Usage or argument error</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>
+                                Environment or toolchain prerequisite failure
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <p class="dim">CLI tools built with <a href="https://noora.tuist.dev" style="color:var(--accent)">Noora</a>. JSON mode emits structured errors for Composer integration.</p>
+
+                <h2>Build Artifact</h2>
+                <pre><code>.build/score/
+  /static
+    index.html
+    about/index.html
+    as-global.css
+    as-group-N.css
+    as-interactivity.js  <span class="cmt">(optional)</span>
+    as-data.js           <span class="cmt">(optional)</span>
+    assets/
+  /server*              <span class="cmt">(optional binary)</span>
+  manifest.json</code></pre>
+                <p class="dim">
+                    JS remains zero by default — artifacts only emitted when features require them.
+                    Deterministic: identical inputs produce byte-equivalent outputs.
+                    <code>manifest.json</code> describes version, toolchain, and capability flags
+                    (<code>static</code>, <code>js_runtime</code>, <code>server_runtime</code>,
+                    <code>persistence</code>, <code>auth</code>).
+                    Deployable outside Stage with no Stage-specific coupling.
+                </p>
+
+                <h2>Runtime</h2>
+                <p>
+                    Server: route requests through <code>Application</code>/<code>Page</code>/<code>Controller</code>,
+                    render via <code>ScoreHTML</code>, collect scoped CSS via <code>ScoreCSS</code>,
+                    assemble complete documents, return standards-compliant HTTP responses.
+                    This establishes the canonical browser document that enhancement layers attach to.
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Concern</th>
+                            <th>Production</th>
+                            <th>Development</th>
+                        </tr>
+                        <tr>
+                            <td>DOM targeting</td>
+                            <td>Compiler-emitted direct references</td>
+                            <td><code>data-s</code> attributes for inspectability</td>
+                        </tr>
+                        <tr>
+                            <td>Styling</td>
+                            <td>Scoped class names from modifier sets</td>
+                            <td>Same as production</td>
+                        </tr>
+                        <tr>
+                            <td>Event wiring</td>
+                            <td>Compiler-emitted listener attachment</td>
+                            <td>Same as production</td>
+                        </tr>
+                        <tr>
+                            <td>Inspection</td>
+                            <td>None required for correctness</td>
+                            <td>Debug annotations for devtools</td>
+                        </tr>
+                    </table>
+                </div>
+                <p class="dim">Browser-first: real forms, real links, platform UI primitives (dialog, popover, scroll restoration), browser storage and messaging standards. No user-exposed <code>Signal</code> type, no implicit global store, no runtime template parsing.</p>
+
+                <h2>Storage</h2>
+                <pre><code><span class="kw">let</span> <span class="prop">user</span> = <span class="kw">try await</span> store.<span class="fn">get</span>(<span class="type">Key</span>(<span class="str">"users"</span>, userId))
+<span class="kw">try await</span> store.<span class="fn">set</span>(<span class="type">Key</span>(<span class="str">"users"</span>, userId), <span class="prop">value</span>: user)
+
+<span class="kw">for try await</span> <span class="prop">item</span> <span class="kw">in</span> store.<span class="fn">scan</span>(<span class="prop">prefix</span>: <span class="type">Key</span>(<span class="str">"users"</span>)) {
+    <span class="cmt">// consume item</span>
+}
+
+<span class="kw">try await</span> store.<span class="fn">transaction</span> { <span class="prop">tx</span> <span class="kw">in</span>
+    tx.<span class="fn">set</span>(...)
+    tx.<span class="fn">delete</span>(...)
+}</code></pre>
+                <p class="dim">
+                    One transactional KV store. Ordered-key tuples (<code>tenant/collection/id</code>).
+                    FoundationDB in production, lightweight local engine for dev.
+                    Short bounded transactions, no blocking I/O in closures, idempotent mutations.
+                </p>
+
+                <h2>Delivery</h2>
+                <p>Score's end state: sole framework dependency for <code>new.sh</code> web apps. Current stack parity covers UI, CSS, HTTP server, auth (magic link, passkey, CSRF, rate limiting), markdown content, asset fingerprinting, analytics, and 30 UI components.</p>
+                <ol>
+                    <li><strong>CLI tooling</strong> — <code>score init</code>, <code>score dev</code>, <code>score build</code>, <code>score deploy</code></li>
+                    <li><strong>Core middleware</strong> — CORS, compression, file uploads</li>
+                    <li><strong>Data layer</strong> — <code>ScoreData</code> with SQLite local / PostgreSQL production</li>
+                    <li><strong>Auth expansion</strong> — JWT, OAuth2/OIDC</li>
+                    <li><strong>Interactivity</strong> — drag and drop, WebSocket</li>
+                    <li><strong>Payments</strong> — Stripe integration</li>
+                    <li><strong>DX</strong> — testing framework, structured logging</li>
+                </ol>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════════════
+     STAGE
+═══════════════════════════════════════════════════════════════ -->
+            <section id="stage">
+                <h1>Stage PRD</h1>
+                <p class="subtitle">hosting · operations</p>
+
+                <h2>Overview</h2>
+                <p>
+                    Stage is the hosting and operations product in the Allegro
+                    ecosystem. It exists to run workloads produced by Score and
+                    other Swift executables without coupling the infrastructure
+                    layer to Score internals.
+                </p>
+
+                <h2>Product Goals</h2>
+                <ul>
+                    <li>Host static output cleanly</li>
+                    <li>Host runtime binaries cleanly</li>
+                    <li>Treat Swift workloads as a first-class target</li>
+                    <li>Remain usable without requiring Score</li>
+                </ul>
+
+                <h2>Boundary with Score</h2>
+                <p>Score builds applications. Stage hosts them.</p>
+                <ul>
+                    <li>Stage infrastructure must remain Score-independent.</li>
+                    <li>Stage may use Score for its own web surfaces.</li>
+                    <li>
+                        Stage should not require privileged knowledge of Score
+                        internals.
+                    </li>
+                </ul>
+
+                <h2>Remote Build Compatibility</h2>
+                <p>
+                    Stage is the remote build executor for production deploys:
+                </p>
+                <ul>
+                    <li>
+                        Run remote builds using canonical
+                        <code>score build</code> semantics
+                    </li>
+                    <li>Pin Score and Swift toolchain versions per build</li>
+                    <li>Use reproducible build environments</li>
+                    <li>
+                        Return deployment IDs and service URLs after activation
+                    </li>
+                    <li>Keep artifacts portable beyond Stage</li>
+                </ul>
+
+                <h2>Expected Capabilities</h2>
+                <ul>
+                    <li>Local development and preview workflows</li>
+                    <li>Deployment and hosting flows</li>
+                    <li>Logs and environment management</li>
+                    <li>Support for both static and runtime workloads</li>
+                </ul>
+                <p class="dim">
+                    The exact CLI and dashboard surface should be documented
+                    once implementation begins, not before.
+                </p>
+
+                <h2>Non-Goals</h2>
+                <ul>
+                    <li>Becoming a general JavaScript hosting platform</li>
+                    <li>Forcing users into Score to use Stage</li>
+                    <li>
+                        Recreating mature infrastructure primitives without
+                        clear benefit
+                    </li>
+                </ul>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════════════
+     COMPOSER
+═══════════════════════════════════════════════════════════════ -->
+            <section id="composer">
+                <h1>Composer PRD</h1>
+                <p class="subtitle">native visual editor · macOS + iPad</p>
+
+                <h2>Overview</h2>
+                <p>
+                    Composer is a native macOS and iPad application for editing
+                    canonical Score Swift projects with local preview.
+                    Production builds run remotely on Stage so deploy output is
+                    deterministic and reproducible.
+                </p>
+                <p>
+                    Composer is intentionally thin: it edits canonical Score
+                    projects, orchestrates CLI workflows, and does not introduce
+                    a proprietary runtime or project format.
+                </p>
+
+                <h2>Product Goals</h2>
+                <ul>
+                    <li>Visual-first onboarding to Score</li>
+                    <li>Static-first builds by default</li>
+                    <li>Deterministic, reproducible production builds</li>
+                    <li>Atomic zero-downtime deploys through Stage</li>
+                    <li>Portable build artifacts deployable beyond Stage</li>
+                </ul>
+
+                <h2>Single-Worker Model</h2>
+                <p>
+                    Composer runs exactly one sandboxed worker at a time: one
+                    hydrated project, inactive projects compressed and evicted,
+                    no concurrent build containers.
+                </p>
+
+                <h2>Build Modes</h2>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Mode</th>
+                            <th>Trigger</th>
+                            <th>Where</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td>Dev (Code)</td>
+                            <td>Swift file save</td>
+                            <td>Local</td>
+                            <td>compile + preview</td>
+                        </tr>
+                        <tr>
+                            <td>Dev (Composer)</td>
+                            <td>Structural block edit</td>
+                            <td>Local</td>
+                            <td>compile + preview</td>
+                        </tr>
+                        <tr>
+                            <td>Build (Local)</td>
+                            <td><code>score build</code></td>
+                            <td>Local</td>
+                            <td>production parity</td>
+                        </tr>
+                        <tr>
+                            <td>Build (Deploy)</td>
+                            <td>Publish</td>
+                            <td>Stage</td>
+                            <td>canonical production build</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2>CLI Integration</h2>
+                <p>
+                    Composer depends on Score CLI as its execution backbone. All
+                    three commands (<code>score dev</code>,
+                    <code>score build</code>, <code>score deploy</code>) must
+                    expose structured diagnostics for editor display and keep
+                    their error schema backward-compatible.
+                </p>
+
+                <h2>Non-Goals</h2>
+                <ul>
+                    <li>Composer-specific runtime</li>
+                    <li>Visual-only logic engine</li>
+                    <li>Runtime graph interpreter inside the editor</li>
+                    <li>Platform-locked project format</li>
+                    <li>Hidden infrastructure coupling</li>
+                </ul>
+
+                <h2>Risks and Mitigations</h2>
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Risk</th>
+                            <th>Mitigation</th>
+                        </tr>
+                        <tr>
+                            <td>Toolchain drift</td>
+                            <td>Pin Score + Swift versions in manifest</td>
+                        </tr>
+                        <tr>
+                            <td>iPad toolchain limits</td>
+                            <td>Remote production build on Stage</td>
+                        </tr>
+                        <tr>
+                            <td>Compile latency</td>
+                            <td>Incremental build in <code>score dev</code></td>
+                        </tr>
+                        <tr>
+                            <td>Large project size</td>
+                            <td>Compression + eviction policy</td>
+                        </tr>
+                        <tr>
+                            <td>Debug complexity</td>
+                            <td>Structured logs/diagnostics from CLI</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+        </div>
+        <!-- .wrapper -->
+
+        <script>
+            function switchTab(id) {
+                document
+                    .querySelectorAll(".nav-tab")
+                    .forEach((t) =>
+                        t.classList.toggle("active", t.dataset.tab === id),
+                    );
+                document
+                    .querySelectorAll("section")
+                    .forEach((s) => s.classList.toggle("active", s.id === id));
+                window.scrollTo(0, 0);
+                history.replaceState(null, "", "#" + id);
+            }
+
+            document.querySelectorAll(".nav-tab").forEach((tab) => {
+                tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+            });
+
+            const hash = location.hash.slice(1);
+            if (hash && document.getElementById(hash)) switchTab(hash);
+        </script>
+    </body>
+</html>
